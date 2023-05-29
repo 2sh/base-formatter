@@ -192,21 +192,23 @@ export default class NumRadix
 
         const roundingIndex = maxFractionalLength.plus(baseIntVal.length)
         let isRemainder = false
+        let onlyZeros = true
         for(let i=baseVal.length-1; i>=0; i--)
         {
-            if(baseVal[i] === null) continue
+            let value = baseVal[i]
+            if(value === null) continue
             const isRounded = roundingIndex.lessThan(i)
             
             if (isRemainder)
             {
-                baseVal[i] = baseVal[i]!.plus(1)
-                isRemainder = baseVal[i]!.greaterThanOrEqualTo(this.base)
+                value = value.plus(1)
+                isRemainder = value.greaterThanOrEqualTo(this.base)
             }
 
             if (!isRemainder && isRounded)
             {
                 if (opts.roundingMode === 'halfExpand')
-                    isRemainder = baseVal[i]!.greaterThanOrEqualTo(this.base/2)
+                    isRemainder = value.greaterThanOrEqualTo(this.base/2)
                 else if (opts.roundingMode === 'ceil')
                     isRemainder = !isNegative
                 else if (opts.roundingMode === 'floor')
@@ -215,11 +217,16 @@ export default class NumRadix
             }
 
             if (isRemainder)
-                baseVal[i] = new Decimal(0)
+                value = new Decimal(0)
+
+            if (!value.isZero())
+                onlyZeros = false
             
-            if (isRounded || (!isRemainder && baseIntVal.length <= i && (baseVal[i]!.equals(0))))
+            baseVal[i] = value
+            
+            if (isRounded || (onlyZeros && baseIntVal.length < i))
                 baseVal.pop()
-            else
+            else if(!isRemainder)
                 break
         }
         if (isRemainder) baseVal.unshift(new Decimal(1))
