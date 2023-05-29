@@ -2,7 +2,7 @@
   "name": "num-radix",
   "version": "0.0.1",
   "description": "Num Radix",
-  "license": "GPL-3.0-only",
+  "license": "MPL-2.0",
   "dependencies": {
     "@types/node": "^20.2.4",
     "decimal.js": "^10.4.3"
