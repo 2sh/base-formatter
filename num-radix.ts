@@ -9,7 +9,8 @@ type Options = {
     positiveSign?: string
     thousandsSeparator?: string
     eNotationCharacter?: string
-    padCharacter?: string | null // the digit zero char if not string
+    integerPadCharacter?: string | null // the digit zero char if not string
+    fractionPadCharacter?: string | null
 
     // out of norm changes
     decimalDisplay?: 'auto' | 'always' // auto: if fraction
@@ -53,7 +54,8 @@ export default class NumRadix
             positiveSign: '+',
             thousandsSeparator: ',',
             eNotationCharacter: 'e',
-            padCharacter: null,
+            integerPadCharacter: null,
+            fractionPadCharacter: null,
 
             decimalDisplay: 'auto',
             signDisplay: 'auto',
@@ -154,8 +156,10 @@ export default class NumRadix
     public encode(numberValue: number | string | Decimal, options?: Options)
     {
         const opts: Options = {...this.options, ...options}
-        if (typeof opts.padCharacter !== "string")
-            opts.padCharacter = this.digits[0]
+        if (typeof opts.integerPadCharacter !== "string")
+            opts.integerPadCharacter = this.digits[0]
+        if (typeof opts.fractionPadCharacter !== "string")
+            opts.fractionPadCharacter = this.digits[0]
         if (opts.fractionDigits !== null)
         {
             opts.minimumFractionDigits = opts.fractionDigits
@@ -237,7 +241,7 @@ export default class NumRadix
 
         const convertedIntVal =
             (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
-                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.padCharacter), ...roundedIntVal]
+                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
                 : roundedIntVal)
             .map(n => this.convertDigit(n))
             .reverse()
@@ -253,7 +257,7 @@ export default class NumRadix
         
         const convertedFractVal =
             (opts.minimumFractionDigits! > roundedFractVal.length
-                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length), opts.padCharacter)]
+                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length), opts.fractionPadCharacter)]
                 : roundedFractVal)
             .map(n => this.convertDigit(n))
             .join('')
