@@ -8,7 +8,7 @@ type Options = {
     negativeSign?: string
     positiveSign?: string
     thousandsSeparator?: string
-    eNotationCharacter?: string
+    scientificNotationCharacter?: string
     integerPadCharacter?: string | null // the digit zero char if not string
     fractionPadCharacter?: string | null
 
@@ -16,7 +16,6 @@ type Options = {
     decimalDisplay?: 'auto' | 'always' // auto: if fraction
     signDisplay?: 'auto' | 'always' | 'exceptZero' | 'negative' | 'never'
     roundingMode?: 'ceil' | 'floor' | 'trunc' | 'halfExpand' // todo: add more and make sure the implemented ones are correct
-    useGrouping?: false | true | "always" | 'min2' // todo: make sure min2 is implemented correct
 
     // format
     precision?: number
@@ -25,6 +24,7 @@ type Options = {
     maximumFractionDigits?: number | null // if not number, no limit other than precision
     minimumIntegerDigits?: number // zero padding
     notation?: 'standard' | 'scientific' | 'engineering' | 'compact' // todo: engineering and compact
+    useGrouping?: false | true | "always" | 'min2'
 }
 
 function createPadArray(amount: Decimal, character: string): string[]
@@ -53,14 +53,13 @@ export default class NumRadix
             negativeSign: '-',
             positiveSign: '+',
             thousandsSeparator: ',',
-            eNotationCharacter: 'e',
+            scientificNotationCharacter: 'e',
             integerPadCharacter: null,
             fractionPadCharacter: null,
 
             decimalDisplay: 'auto',
             signDisplay: 'auto',
             roundingMode: 'halfExpand',
-            useGrouping: false,
 
             precision: 32,
             fractionDigits: null,
@@ -68,6 +67,7 @@ export default class NumRadix
             maximumFractionDigits: null,
             minimumIntegerDigits: 0,
             notation: 'standard',
+            useGrouping: false,
 
             ...options
         }
@@ -235,7 +235,7 @@ export default class NumRadix
         }
         if (isRemainder) baseVal.unshift(new Decimal(1))
         
-        const nullPos = baseVal.findIndex((e) => e == null)
+        const nullPos = baseVal.findIndex(e => e == null)
         const roundedIntVal = baseVal.slice(0, nullPos) as Decimal[]
         const roundedFractVal = baseVal.slice(nullPos+1) as Decimal[]
 
@@ -273,6 +273,6 @@ export default class NumRadix
         return outputSignSymbol
             + convertedIntVal
             + (convertedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter! + convertedFractVal) : '')
-            + (makeExponential ? opts.eNotationCharacter! + exponent : '')
+            + (makeExponential ? opts.scientificNotationCharacter! + exponent : '')
     }
 }
