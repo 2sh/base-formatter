@@ -4,12 +4,12 @@ import Decimal from 'decimal.js'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
 type Options = {
-    decimalSeparator?: string
-    negativeSymbol?: string
-    positiveSymbol?: string
+    radixCharacter?: string
+    negativeSign?: string
+    positiveSign?: string
     thousandsSeparator?: string
-    exponentSymbol?: string
-    padSymbol?: string | null // the digit zero char if not string
+    eNotationCharacter?: string
+    padCharacter?: string | null // the digit zero char if not string
 
     // out of norm changes
     decimalDisplay?: 'auto' | 'always' // auto: if fraction
@@ -20,15 +20,15 @@ type Options = {
     // format
     precision?: number
     fractionDigits?: number | null // exact number of fraction Digits
-    minimumFractionDigits?: number // todo: make sure this is working
+    minimumFractionDigits?: number
     maximumFractionDigits?: number | null // if not number, no limit other than precision
     minimumIntegerDigits?: number // zero padding
     notation?: 'standard' | 'scientific' | 'engineering' | 'compact' // todo: engineering and compact
 }
 
-function zeroFilledArray(amount: Decimal): Decimal[]
+function createPadArray(amount: Decimal, character: string): string[]
 {
-    return Array(amount.toNumber()).fill(new Decimal(0))
+    return Array(amount.toNumber()).fill(character)
 }
 
 const numbers = '0123456789'
@@ -48,12 +48,12 @@ export default class NumRadix
         this.base = digits.length
         this.lnBase = (new Decimal(this.base)).ln()
         this.options = {
-            decimalSeparator: '.',
-            negativeSymbol: '-',
-            positiveSymbol: '+',
+            radixCharacter: '.',
+            negativeSign: '-',
+            positiveSign: '+',
             thousandsSeparator: ',',
-            exponentSymbol: 'e',
-            padSymbol: null,
+            eNotationCharacter: 'e',
+            padCharacter: null,
 
             decimalDisplay: 'auto',
             signDisplay: 'auto',
@@ -84,11 +84,11 @@ export default class NumRadix
     static hex(options?: Options) { return new NumRadix(numbers + "ABCDEF", options) }
     static hexLc(options?: Options) { return new NumRadix(numbers + "abcdef", options) }
     static doz(options?: Options)
-        { return new NumRadix(numbers + '↊↋', {decimalSeparator: ';', ...options}) }
+        { return new NumRadix(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     static dozAscii(options?: Options)
-        { return new NumRadix(numbers + 'TE', {decimalSeparator: ';', ...options}) }
+        { return new NumRadix(numbers + 'TE', {radixCharacter: ';', ...options}) }
     static dozRoman(options?: Options)
-        { return new NumRadix(numbers + 'XE', {decimalSeparator: ';', ...options}) }
+        { return new NumRadix(numbers + 'XE', {radixCharacter: ';', ...options}) }
     static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -145,16 +145,17 @@ export default class NumRadix
         return baseVal
     }
 
-    private convertDigit(value: Decimal): string
+    private convertDigit(value: Decimal | string): string
     {
+        if (typeof value === 'string') return value
         return this.digits[value.toNumber()]
     }
 
     public encode(numberValue: number | string | Decimal, options?: Options)
     {
         const opts: Options = {...this.options, ...options}
-        if (typeof opts.padSymbol !== "string")
-            opts.padSymbol = this.digits[0]
+        if (typeof opts.padCharacter !== "string")
+            opts.padCharacter = this.digits[0]
         if (opts.fractionDigits !== null)
         {
             opts.minimumFractionDigits = opts.fractionDigits
@@ -204,8 +205,7 @@ export default class NumRadix
                 value = value.plus(1)
                 isRemainder = value.greaterThanOrEqualTo(this.base)
             }
-
-            if (!isRemainder && isRounded)
+            else if (isRounded)
             {
                 if (opts.roundingMode === 'halfExpand')
                     isRemainder = value.greaterThanOrEqualTo(this.base/2)
@@ -237,14 +237,14 @@ export default class NumRadix
 
         const convertedIntVal =
             (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
-                ? zeroFilledArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length)).concat(roundedIntVal)
+                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.padCharacter), ...roundedIntVal]
                 : roundedIntVal)
             .map(n => this.convertDigit(n))
             .reverse()
             .reduce((acc, cur, i, array) =>
             {
                 const isMin2 = opts.useGrouping === "min2"
-                if (opts.useGrouping && i > 0 && (i % 3) == 0 && (!isMin2 || array.length > i)) acc.push(opts.thousandsSeparator!)
+                if (opts.useGrouping && i > 0 && (i % 3) == 0 && (!isMin2 || array.length > i+1)) acc.push(opts.thousandsSeparator!)
                 acc.push(cur)
                 return acc
             }, [] as string[])
@@ -253,12 +253,12 @@ export default class NumRadix
         
         const convertedFractVal =
             (opts.minimumFractionDigits! > roundedFractVal.length
-                ? roundedFractVal.concat(zeroFilledArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length)))
+                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length), opts.padCharacter)]
                 : roundedFractVal)
             .map(n => this.convertDigit(n))
             .join('')
         
-        const signSymbol = isNegative ? opts.negativeSymbol : opts.positiveSymbol
+        const signSymbol = isNegative ? opts.negativeSign : opts.positiveSign
         const outputSignSymbol = 
             (opts.signDisplay == "always" && signSymbol)
             || (opts.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
@@ -268,7 +268,7 @@ export default class NumRadix
         
         return outputSignSymbol
             + convertedIntVal
-            + (convertedFractVal || opts.decimalDisplay === 'always' ? (opts.decimalSeparator! + convertedFractVal) : '')
-            + (makeExponential ? opts.exponentSymbol! + exponent : '')
+            + (convertedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter! + convertedFractVal) : '')
+            + (makeExponential ? opts.eNotationCharacter! + exponent : '')
     }
 }
