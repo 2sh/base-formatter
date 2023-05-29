@@ -1,0 +1,14 @@
+{
+  "name": "num-radix",
+  "version": "0.0.1",
+  "description": "Num Radix",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "@types/node": "^20.2.4",
+    "decimal.js": "^10.4.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
