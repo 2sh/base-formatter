@@ -54,8 +54,8 @@ export default class NumRadix
 
     constructor(digits: string[] | string, options?: Options)
     {
-        this.digits = typeof digits === 'string' ? digits.split('') : digits 
-        this.base = digits.length
+        this.digits = typeof digits === 'string' ? [...digits] : digits 
+        this.base = this.digits.length
         this.lnBase = (new Decimal(this.base)).ln()
         this.options = {
             radixCharacter: '.',
