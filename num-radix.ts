@@ -93,17 +93,19 @@ export default class NumRadix
             options)
     }
 
-    static bin(options?: Options) { return new NumRadix('01', options) }
-    static oct(options?: Options) { return new NumRadix(numbers.slice(0,8), options)}
-    static dec(options?: Options) { return new NumRadix(numbers, options) }
-    static hex(options?: Options) { return new NumRadix(numbers + "ABCDEF", options) }
-    static hexLc(options?: Options) { return new NumRadix(numbers + "abcdef", options) }
-    static doz(options?: Options)
+    static binary(options?: Options) { return new NumRadix('01', options) }
+    static octal(options?: Options) { return new NumRadix(numbers.slice(0,8), options)}
+    static decimal(options?: Options) { return new NumRadix(numbers, options) }
+    static hexadecimal(options?: Options) { return new NumRadix(numbers + "ABCDEF", options) }
+    static dozenal(options?: Options)
         { return new NumRadix(numbers + '↊↋', {radixCharacter: ';', ...options}) }
-    static dozAscii(options?: Options)
+    static dozenalInitials(options?: Options)
         { return new NumRadix(numbers + 'TE', {radixCharacter: ';', ...options}) }
-    static dozRoman(options?: Options)
+    static dozenalRoman(options?: Options)
         { return new NumRadix(numbers + 'XE', {radixCharacter: ';', ...options}) }
+    static duodecimal(options?: Options)
+        { return new NumRadix(numbers + 'AB', {...options}) }
+    static vigesimal(options?: Options) { return new NumRadix(numbers + "ABCDEFGHJK", options) }
     static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -123,8 +125,38 @@ export default class NumRadix
             .replace('0', '')
         return new NumRadix(digits, options)
     }
+    static cuneiform(options?: Options)
+        {
+            const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
+            const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
+            const digits = tens.map(t => ones.map(o => t + o)).flat()
+            return new NumRadix(digits,
+            {
+                radixCharacter: ';',
+                integerPadCharacter: ' ',
+                fractionPadCharacter: ' ',
+                ...options
+            })
+        }
     static base62(options?: Options)
         { return new NumRadix(numbers + asciiUppercase + asciiLowercase, options) }
+    static domino(options?: Options)
+    {
+        const chars =
+           '🁣🁤🁥🁦🁧🁨🁩🀱🀲🀳🀴🀵🀶🀷'
+         + '🁪🁫🁬🁭🁮🁯🁰🀸🀹🀺🀻🀼🀽🀾'
+         + '🁱🁲🁳🁴🁵🁶🁷🀿🁀🁁🁂🁃🁄🁅'
+         + '🁸🁹🁺🁻🁼🁽🁾🁆🁇🁈🁉🁊🁋🁌'
+         + '🁿🂀🂁🂂🂃🂄🂅🁍🁎🁏🁐🁑🁒🁓'
+         + '🂆🂇🂈🂉🂊🂋🂌🁔🁕🁖🁗🁘🁙🁚'
+         + '🂍🂎🂏🂐🂑🂒🂓🁛🁜🁝🁞🁟🁠🁡'
+        return new NumRadix(chars,
+        {
+            radixCharacter: '🁢',
+            negativeSign: '🀰',
+            ...options
+        })
+    }
 
     private calculateExponent(value: Decimal): Decimal
     {

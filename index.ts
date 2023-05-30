@@ -2,10 +2,12 @@ import Decimal from 'decimal.js'
 
 import NumRadix from './num-radix'
 
-//const radix = NumRadix.hex()
+//const radix = NumRadix.decimal()
+//const radix = NumRadix.hexadecimal()
 //const radix = NumRadix.base62()
-const radix = NumRadix.doz()
-//const radix = NumRadix.dec()
+//const radix = NumRadix.dozenal()
+const radix = NumRadix.cuneiform()
+//const radix = NumRadix.domino()
 
 // Radix Demonstration
 
