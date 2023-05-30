@@ -17,6 +17,8 @@ type Options = {
     negativeSign?: string
     positiveSign?: string
     groupingSeparator?: string
+    groupingLength?: number
+    digitSeparator?: string
     scientificNotationCharacter?: string
     integerPadCharacter?: string | null // the digit zero char if not string
     fractionPadCharacter?: string | null
@@ -62,6 +64,8 @@ export default class NumRadix
             negativeSign: '-',
             positiveSign: '+',
             groupingSeparator: ',',
+            groupingLength: 3,
+            digitSeparator: '',
             scientificNotationCharacter: 'e',
             integerPadCharacter: null,
             fractionPadCharacter: null,
@@ -256,8 +260,19 @@ export default class NumRadix
             .reverse()
             .reduce((acc, cur, i, array) =>
             {
-                const isMin2 = opts.useGrouping === "min2"
-                if (opts.useGrouping && i > 0 && (i % 3) == 0 && (!isMin2 || array.length > i+1)) acc.push(opts.groupingSeparator!)
+                if (i > 0)
+                {
+                    if (opts.useGrouping
+                        && (i % opts.groupingLength!) == 0
+                        && (opts.useGrouping !== "min2" || array.length > i+1))
+                    {
+                        acc.push(opts.groupingSeparator!)
+                    }
+                    else
+                    {
+                        acc.push(opts.digitSeparator!)
+                    }
+                }
                 acc.push(cur)
                 return acc
             }, [] as string[])
