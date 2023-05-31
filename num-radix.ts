@@ -12,7 +12,8 @@ import Decimal from 'decimal.js'
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
-type Options = {
+type Options =
+{
     radixCharacter?: string
     negativeSign?: string
     positiveSign?: string
@@ -23,12 +24,10 @@ type Options = {
     integerPadCharacter?: string | null // the digit zero char if not string
     fractionPadCharacter?: string | null
 
-    // out of norm changes
+    // formatting
     decimalDisplay?: 'auto' | 'always' // auto: if fraction
     signDisplay?: 'auto' | 'always' | 'exceptZero' | 'negative' | 'never'
     roundingMode?: 'ceil' | 'floor' | 'trunc' | 'halfExpand' // todo: add more and make sure the implemented ones are correct
-
-    // format
     precision?: number
     fractionDigits?: number | null // exact number of fraction Digits
     minimumFractionDigits?: number
@@ -53,10 +52,11 @@ export default class NumRadix
     public readonly base: number
     public readonly options: Options
     private readonly lnBase: Decimal
+    private readonly reValid: RegExp
 
     constructor(digits: string[] | string, options?: Options)
     {
-        this.digits = typeof digits === 'string' ? [...digits] : digits 
+        this.digits = typeof digits === 'string' ? [...digits] : digits
         this.base = this.digits.length
         this.lnBase = (new Decimal(this.base)).ln()
         this.options = {
@@ -73,7 +73,6 @@ export default class NumRadix
             decimalDisplay: 'auto',
             signDisplay: 'auto',
             roundingMode: 'halfExpand',
-
             precision: 32,
             fractionDigits: null,
             minimumFractionDigits: 0,
@@ -84,6 +83,33 @@ export default class NumRadix
 
             ...options
         }
+
+        const u = (v: string): string => v ? '\\u' + v.charCodeAt(0).toString(16).padStart(4, '0') : ''
+        const uDigits = this.digits.map(d => u(d)).join('')
+        const digitPattern = '[' + uDigits + ']+'
+        const signPattern = '['
+            + u(this.options.negativeSign)
+            + u(this.options.positiveSign)
+        + ']?'
+        
+        const pattern = '^'
+        + signPattern
+        + '['
+            + uDigits
+            + u(this.options.digitSeparator)
+            + u(this.options.groupingSeparator)
+        + ']+'
+        + '(?:'
+            + u(this.options.radixCharacter)
+            + digitPattern
+        + ')?'
+        + '(?:'
+            + u(this.options.scientificNotationCharacter)
+            + signPattern
+            + digitPattern
+        + ')?'
+        + '$'
+        this.reValid = new RegExp(pattern)
     }
 
     static byBase(base: number, options?: Options)
@@ -135,6 +161,7 @@ export default class NumRadix
                 radixCharacter: ';',
                 integerPadCharacter: ' ',
                 fractionPadCharacter: ' ',
+
                 ...options
             })
         }
@@ -164,7 +191,7 @@ export default class NumRadix
         return value.ln().dividedBy(this.lnBase).floor()
     }
 
-    private convertInteger(value: Decimal): Decimal[]
+    private convertIntegerToRadix(value: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
         let index = 0
@@ -178,7 +205,34 @@ export default class NumRadix
         return baseVal.reverse()
     }
 
-    private convertFractional(value: Decimal, precision: Decimal): Decimal[]
+    private encodeInteger(value: (Decimal | string)[], opts: Options): string
+    {
+        return value
+            .map(n => this.encodeDigit(n))
+            .reverse()
+            .reduce((acc, cur, i, array) =>
+            {
+                if (i > 0)
+                {
+                    if (opts.useGrouping
+                        && (i % opts.groupingLength!) == 0
+                        && (opts.useGrouping !== "min2" || array.length > i+1))
+                    {
+                        acc.push(opts.groupingSeparator!)
+                    }
+                    else
+                    {
+                        acc.push(opts.digitSeparator!)
+                    }
+                }
+                acc.push(cur)
+                return acc
+            }, [] as string[])
+            .reverse()
+            .join('')
+    }
+
+    private convertFractionalToRadix(value: Decimal, precision: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
         const prec = precision.toNumber()
@@ -192,10 +246,17 @@ export default class NumRadix
         return baseVal
     }
 
-    private convertDigit(value: Decimal | string): string
+    private encodeDigit(value: Decimal | string): string
     {
         if (typeof value === 'string') return value
         return this.digits[value.toNumber()]
+    }
+
+    private decodeDigit(value: string): number
+    {
+        const digitIndex = this.digits.indexOf(value)
+        if (!(digitIndex >= 0)) throw 'Invalid digit'
+        return digitIndex
     }
 
     public encode(numberValue: number | string | Decimal, options?: Options)
@@ -207,9 +268,10 @@ export default class NumRadix
             opts.fractionPadCharacter = this.digits[0]
         if (opts.fractionDigits !== null)
         {
-            opts.minimumFractionDigits = opts.fractionDigits
             opts.maximumFractionDigits = opts.fractionDigits
+            opts.minimumFractionDigits = opts.fractionDigits
         }
+        opts.minimumFractionDigits = Math.min(opts.minimumFractionDigits, opts.maximumFractionDigits)
         
         const decVal = new Decimal(numberValue)
         const isNegative = decVal.isNegative()
@@ -220,7 +282,7 @@ export default class NumRadix
         const decPrecision = new Decimal(opts.precision!)
         const maxFractLengthByPrecision = (exponent.greaterThan(0)
             ? decPrecision.minus(exponent)
-            : decPrecision) || 0
+            : decPrecision) || new Decimal(0)
         const maxFractionalLength = (typeof opts.maximumFractionDigits == "number"
             ? Decimal.min(opts.maximumFractionDigits, maxFractLengthByPrecision)
             : maxFractLengthByPrecision)
@@ -231,8 +293,8 @@ export default class NumRadix
         const intVal = expValue.floor()
         const fractVal = expValue.minus(intVal)
         
-        const baseIntVal = this.convertInteger(intVal)
-        const baseFractVal = this.convertFractional(fractVal, maxFractLengthByPrecision)
+        const baseIntVal = this.convertIntegerToRadix(intVal)
+        const baseFractVal = this.convertFractionalToRadix(fractVal, maxFractLengthByPrecision)
 
         const baseVal: (Decimal|null)[] = [
             ...baseIntVal,
@@ -284,38 +346,16 @@ export default class NumRadix
         const roundedIntVal = baseVal.slice(0, nullPos) as Decimal[]
         const roundedFractVal = baseVal.slice(nullPos+1) as Decimal[]
 
-        const convertedIntVal =
+        const encodedIntVal = this.encodeInteger(
             (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
-                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
-                : roundedIntVal)
-            .map(n => this.convertDigit(n))
-            .reverse()
-            .reduce((acc, cur, i, array) =>
-            {
-                if (i > 0)
-                {
-                    if (opts.useGrouping
-                        && (i % opts.groupingLength!) == 0
-                        && (opts.useGrouping !== "min2" || array.length > i+1))
-                    {
-                        acc.push(opts.groupingSeparator!)
-                    }
-                    else
-                    {
-                        acc.push(opts.digitSeparator!)
-                    }
-                }
-                acc.push(cur)
-                return acc
-            }, [] as string[])
-            .reverse()
-            .join('')
+            ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
+            : roundedIntVal), opts)
         
-        const convertedFractVal =
+        const encodedFractVal =
             (opts.minimumFractionDigits! > roundedFractVal.length
                 ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length), opts.fractionPadCharacter)]
                 : roundedFractVal)
-            .map(n => this.convertDigit(n))
+            .map(n => this.encodeDigit(n))
             .join('')
         
         const signSymbol = isNegative ? opts.negativeSign : opts.positiveSign
@@ -326,9 +366,49 @@ export default class NumRadix
             || (opts.signDisplay == "never" && '')
             || isNegative ? signSymbol : ''
         
-        return outputSignSymbol
-            + convertedIntVal
-            + (convertedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter! + convertedFractVal) : '')
-            + (makeExponential ? opts.scientificNotationCharacter! + exponent : '')
+        const encodedExponent = !exponent.equals(0) ? (opts.scientificNotationCharacter! + 
+            this.encode(exponent, {...options, notation: 'standard', fractionDigits: 0})) : ''
+        
+        const outputValue = outputSignSymbol
+        + encodedIntVal
+        + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter! + encodedFractVal) : '')
+        + (makeExponential ? encodedExponent : '')
+        
+        return outputValue
+    }
+
+    decode(encodedValue: string, options?: Options): number
+    {
+        const opts: Options = {...this.options, ...options}
+
+        const isNegative = encodedValue.startsWith(opts.negativeSign)
+
+        const notationIndex = encodedValue.indexOf(opts.scientificNotationCharacter!)
+
+        const exponent = notationIndex >= 0 ? this.decode(encodedValue.slice(notationIndex+1)) : 0
+        const intFractValue = notationIndex >= 0 ? encodedValue.slice(0,notationIndex) : encodedValue
+
+        const cleanedValue = intFractValue
+            .replaceAll(opts.positiveSign, '')
+            .replaceAll(opts.negativeSign, '')
+            .replaceAll(opts.groupingSeparator, '')
+            .replaceAll(opts.digitSeparator, '')
+            .trim()
+
+        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter!)
+        const largestExponent = (radixCharIndex >= 0 ? radixCharIndex : cleanedValue.length) - 1
+
+        let decodedValue = cleanedValue
+            .replace(opts.radixCharacter, '')
+            .split('')
+            .map((d) => this.decodeDigit(d))
+            .reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
+
+        return decodedValue * Math.pow(this.base, -exponent)
+    }
+
+    isNumber(value: string): boolean
+    {
+        return this.reValid.test(value)
     }
 }
