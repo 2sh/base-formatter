@@ -119,19 +119,18 @@ export default class Base
             options)
     }
 
-    static binary(options?: Options) { return new Base('01', options) }
-    static octal(options?: Options) { return new Base(numbers.slice(0,8), options)}
-    static decimal(options?: Options) { return new Base(numbers, options) }
-    static hexadecimal(options?: Options) { return new Base(numbers + "ABCDEF", options) }
+    static binary(options?: Options) { return Base.byBase(2, options) }
+    static octal(options?: Options) { return Base.byBase(8, options) }
+    static decimal(options?: Options) { return Base.byBase(10, options) }
+    static hexadecimal(options?: Options) { return Base.byBase(16, options) }
     static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
     static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
-    static duodecimal(options?: Options)
-        { return new Base(numbers + 'AB', {...options}) }
-    static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
+    static duodecimal(options?: Options) { return Base.byBase(12, options) }
+    static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) } // skipping over I
     static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -165,8 +164,7 @@ export default class Base
                 ...options
             })
         }
-    static base62(options?: Options)
-        { return new Base(numbers + asciiUppercase + asciiLowercase, options) }
+    static base62(options?: Options) { return Base.byBase(62, options) }
     static domino(options?: Options)
     {
         const chars =
