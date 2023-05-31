@@ -150,20 +150,21 @@ export default class Base
             .replace('0', '')
         return new Base(digits, options)
     }
+    static sexagesimal(options?: Options) { return Base.byBase(60, options) }
     static cuneiform(options?: Options)
+    {
+        const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
+        const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
+        const digits = tens.map(t => ones.map(o => t + o)).flat()
+        return new Base(digits,
         {
-            const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
-            const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
-            const digits = tens.map(t => ones.map(o => t + o)).flat()
-            return new Base(digits,
-            {
-                radixCharacter: ';',
-                integerPadCharacter: ' ',
-                fractionPadCharacter: ' ',
+            radixCharacter: ';',
+            integerPadCharacter: ' ',
+            fractionPadCharacter: ' ',
 
-                ...options
-            })
-        }
+            ...options
+        })
+    }
     static base62(options?: Options) { return Base.byBase(62, options) }
     static domino(options?: Options)
     {
