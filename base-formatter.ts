@@ -1,5 +1,5 @@
 /*
- * num-radix
+ * base-formatter
  * Copyright (C) 2023 2sh <contact@2sh.me>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -46,7 +46,7 @@ const numbers = '0123456789'
 const asciiUppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 
-export default class NumRadix
+export default class Base
 {
     public readonly digits: string[]
     public readonly base: number
@@ -113,24 +113,24 @@ export default class NumRadix
 
     static byBase(base: number, options?: Options)
     {
-        return new BaseFormat(
+        return new Base(
             (numbers + asciiUppercase + asciiLowercase).slice(0, base),
             options)
     }
 
-    static binary(options?: Options) { return new BaseFormat('01', options) }
-    static octal(options?: Options) { return new BaseFormat(numbers.slice(0,8), options)}
-    static decimal(options?: Options) { return new BaseFormat(numbers, options) }
-    static hexadecimal(options?: Options) { return new BaseFormat(numbers + "ABCDEF", options) }
+    static binary(options?: Options) { return new Base('01', options) }
+    static octal(options?: Options) { return new Base(numbers.slice(0,8), options)}
+    static decimal(options?: Options) { return new Base(numbers, options) }
+    static hexadecimal(options?: Options) { return new Base(numbers + "ABCDEF", options) }
     static dozenal(options?: Options)
-        { return new BaseFormat(numbers + '↊↋', {radixCharacter: ';', ...options}) }
+        { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     static dozenalInitials(options?: Options)
-        { return new BaseFormat(numbers + 'TE', {radixCharacter: ';', ...options}) }
+        { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
     static dozenalRoman(options?: Options)
-        { return new BaseFormat(numbers + 'XE', {radixCharacter: ';', ...options}) }
+        { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
     static duodecimal(options?: Options)
-        { return new BaseFormat(numbers + 'AB', {...options}) }
-    static vigesimal(options?: Options) { return new BaseFormat(numbers + "ABCDEFGHJK", options) }
+        { return new Base(numbers + 'AB', {...options}) }
+    static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
     static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -139,7 +139,7 @@ export default class NumRadix
             .replace('1', '')
             .replace('O', '')
             .replace('0', '')
-        return new BaseFormat(digits, options)
+        return new Base(digits, options)
     }
     static base58(options?: Options)
     {
@@ -148,14 +148,14 @@ export default class NumRadix
             .replace('l', '')
             .replace('O', '')
             .replace('0', '')
-        return new BaseFormat(digits, options)
+        return new Base(digits, options)
     }
     static cuneiform(options?: Options)
         {
             const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
             const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
             const digits = tens.map(t => ones.map(o => t + o)).flat()
-            return new BaseFormat(digits,
+            return new Base(digits,
             {
                 radixCharacter: ';',
                 integerPadCharacter: ' ',
@@ -165,7 +165,7 @@ export default class NumRadix
             })
         }
     static base62(options?: Options)
-        { return new BaseFormat(numbers + asciiUppercase + asciiLowercase, options) }
+        { return new Base(numbers + asciiUppercase + asciiLowercase, options) }
     static domino(options?: Options)
     {
         const chars =
@@ -176,7 +176,7 @@ export default class NumRadix
          + '🁿🂀🂁🂂🂃🂄🂅🁍🁎🁏🁐🁑🁒🁓'
          + '🂆🂇🂈🂉🂊🂋🂌🁔🁕🁖🁗🁘🁙🁚'
          + '🂍🂎🂏🂐🂑🂒🂓🁛🁜🁝🁞🁟🁠🁡'
-        return new BaseFormat(chars,
+        return new Base(chars,
         {
             radixCharacter: '🁢',
             negativeSign: '🀰',
@@ -190,7 +190,7 @@ export default class NumRadix
         return value.ln().dividedBy(this.lnBase).floor()
     }
 
-    private convertIntegerToRadix(value: Decimal): Decimal[]
+    private convertIntegerToBase(value: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
         let index = 0
@@ -231,7 +231,7 @@ export default class NumRadix
             .join('')
     }
 
-    private convertFractionalToRadix(value: Decimal, precision: Decimal): Decimal[]
+    private convertFractionalToBase(value: Decimal, precision: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
         const prec = precision.toNumber()
@@ -292,8 +292,8 @@ export default class NumRadix
         const intVal = expValue.floor()
         const fractVal = expValue.minus(intVal)
         
-        const baseIntVal = this.convertIntegerToRadix(intVal)
-        const baseFractVal = this.convertFractionalToRadix(fractVal, maxFractLengthByPrecision)
+        const baseIntVal = this.convertIntegerToBase(intVal)
+        const baseFractVal = this.convertFractionalToBase(fractVal, maxFractLengthByPrecision)
 
         const baseVal: (Decimal|null)[] = [
             ...baseIntVal,
