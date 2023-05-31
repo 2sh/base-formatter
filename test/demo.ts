@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js'
 
-import Base from './base-formatter'
+import Base from '../src/base-formatter'
 
 //const base = Base.decimal()
 //const base = Base.hexadecimal()
@@ -10,6 +10,11 @@ const base = Base.dozenal()
 //const base = Base.domino()
 
 // Base Demonstration
+
+const value = base.encode(300001, {notation: 'scientific', maximumFractionDigits: 10})
+
+console.log(value, base.isNumber(value)) // todo: remove 0s in value
+
 console.log("Multiplication Table")
 
 const size = Math.min(20, base.base+1)
