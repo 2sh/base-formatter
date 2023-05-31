@@ -51,13 +51,20 @@ for (let i=2; i<size; i++)
 console.log()
 
 console.log("Date & Time")
-let c =  new Date()
-let l = [c.getFullYear(), c.getMonth()+1, c.getDate(),
-	c.getHours(), c.getMinutes(), c.getSeconds()]
-	.map(p => radix.encode(p, {minimumIntegerDigits: 2}))
-console.log(`Local: ${l[0]}-${l[1]}-${l[2]} ${l[3]}:${l[4]}:${l[5]}`)
 
-l = [c.getUTCFullYear(), c.getUTCMonth()+1, c.getUTCDate(),
-	c.getUTCHours(), c.getUTCMinutes(), c.getUTCSeconds()]
-	.map(p => radix.encode(p, {minimumIntegerDigits: 2}))
-console.log(`UTC:   ${l[0]}-${l[1]}-${l[2]} ${l[3]}:${l[4]}:${l[5]}`)
+const dateString = (date: Date, iso: boolean) =>
+{   const u = iso ? 'UTC' : ''
+    const p = [
+        date[`get${u}FullYear`](),
+        date[`get${u}Month`]() + 1,
+        date[`get${u}Date`](),
+        date[`get${u}Hours`](),
+        date[`get${u}Minutes`](),
+        date[`get${u}Seconds`](),
+    ].map(i => radix.encode(i, {minimumIntegerDigits: 2}))
+    return `${p[0]}-${p[1]}-${p[2]} ${p[3]}:${p[4]}:${p[5]}`
+}
+
+const d = new Date()
+console.log('Local: ' + dateString(d, false))
+console.log('UTC:   ' + dateString(d, true))
