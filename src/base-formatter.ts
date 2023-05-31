@@ -33,7 +33,7 @@ type Properties =
     minimumFractionDigits: number
     maximumFractionDigits: number | null // if not number, no limit other than precision
     minimumIntegerDigits: number // zero padding
-    notation: 'standard' | 'scientific' | 'engineering' | 'compact' // todo: engineering and compact
+    notation: 'standard' | 'scientific' // todo: look into 'engineering' and 'compact' and whether to implement them
     useGrouping: false | true | "always" | 'min2'
 }
 type Options = Partial<Properties>
