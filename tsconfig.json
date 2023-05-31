@@ -2,6 +2,8 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "CommonJS",
+    "sourceMap": true,
+    "strict": true,
     "declaration": true,
     "outDir": "./dist"
   },

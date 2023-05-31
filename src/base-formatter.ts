@@ -12,30 +12,31 @@ import Decimal from 'decimal.js'
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
-type Options =
+type Properties =
 {
-    radixCharacter?: string
-    negativeSign?: string
-    positiveSign?: string
-    groupingSeparator?: string
-    groupingLength?: number
-    digitSeparator?: string
-    scientificNotationCharacter?: string
-    integerPadCharacter?: string | null // the digit zero char if not string
-    fractionPadCharacter?: string | null
+    radixCharacter: string
+    negativeSign: string
+    positiveSign: string
+    groupingSeparator: string
+    groupingLength: number
+    digitSeparator: string
+    scientificNotationCharacter: string
+    integerPadCharacter: string | null // the digit zero char if not string
+    fractionPadCharacter: string | null
 
     // formatting
-    decimalDisplay?: 'auto' | 'always' // auto: if fraction
-    signDisplay?: 'auto' | 'always' | 'exceptZero' | 'negative' | 'never'
-    roundingMode?: 'ceil' | 'floor' | 'trunc' | 'halfExpand' // todo: add more and make sure the implemented ones are correct
-    precision?: number
-    fractionDigits?: number | null // exact number of fraction Digits
-    minimumFractionDigits?: number
-    maximumFractionDigits?: number | null // if not number, no limit other than precision
-    minimumIntegerDigits?: number // zero padding
-    notation?: 'standard' | 'scientific' | 'engineering' | 'compact' // todo: engineering and compact
-    useGrouping?: false | true | "always" | 'min2'
+    decimalDisplay: 'auto' | 'always' // auto: if fraction
+    signDisplay: 'auto' | 'always' | 'exceptZero' | 'negative' | 'never'
+    roundingMode: 'ceil' | 'floor' | 'trunc' | 'halfExpand' // todo: add more and make sure the implemented ones are correct
+    precision: number
+    fractionDigits: number | null // exact number of fraction Digits
+    minimumFractionDigits: number
+    maximumFractionDigits: number | null // if not number, no limit other than precision
+    minimumIntegerDigits: number // zero padding
+    notation: 'standard' | 'scientific' | 'engineering' | 'compact' // todo: engineering and compact
+    useGrouping: false | true | "always" | 'min2'
 }
+type Options = Partial<Properties>
 
 function createPadArray(amount: Decimal, character: string): string[]
 {
@@ -50,7 +51,7 @@ export default class Base
 {
     public readonly digits: string[]
     public readonly base: number
-    public readonly options: Options
+    public readonly options: Properties
     private readonly lnBase: Decimal
     private readonly reValid: RegExp
 
@@ -204,7 +205,7 @@ export default class Base
         return baseVal.reverse()
     }
 
-    private encodeInteger(value: (Decimal | string)[], opts: Options): string
+    private encodeInteger(value: (Decimal | string)[], opts: Properties): string
     {
         return value
             .map(n => this.encodeDigit(n))
@@ -214,14 +215,14 @@ export default class Base
                 if (i > 0)
                 {
                     if (opts.useGrouping
-                        && (i % opts.groupingLength!) == 0
-                        && (opts.useGrouping !== "min2" || array.length > i+1))
+                        && (i % opts.groupingLength) == 0
+                        && (opts.useGrouping == "min2" || array.length > i+1))
                     {
-                        acc.push(opts.groupingSeparator!)
+                        acc.push(opts.groupingSeparator)
                     }
                     else
                     {
-                        acc.push(opts.digitSeparator!)
+                        acc.push(opts.digitSeparator)
                     }
                 }
                 acc.push(cur)
@@ -258,9 +259,9 @@ export default class Base
         return digitIndex
     }
 
-    public encode(numberValue: number | string | Decimal, options?: Options)
+    public encode(numberValue: number | string | Decimal, options?: Options): string
     {
-        const opts: Options = {...this.options, ...options}
+        const opts: Properties = {...this.options, ...options}
         if (typeof opts.integerPadCharacter !== "string")
             opts.integerPadCharacter = this.digits[0]
         if (typeof opts.fractionPadCharacter !== "string")
@@ -270,7 +271,9 @@ export default class Base
             opts.maximumFractionDigits = opts.fractionDigits
             opts.minimumFractionDigits = opts.fractionDigits
         }
-        opts.minimumFractionDigits = Math.min(opts.minimumFractionDigits, opts.maximumFractionDigits)
+        opts.minimumFractionDigits = opts.maximumFractionDigits
+            ? Math.min(opts.minimumFractionDigits, opts.maximumFractionDigits)
+            : opts.minimumFractionDigits
         
         const decVal = new Decimal(numberValue)
         const isNegative = decVal.isNegative()
@@ -278,7 +281,7 @@ export default class Base
         
         const exponent = this.calculateExponent(absVal)
 
-        const decPrecision = new Decimal(opts.precision!)
+        const decPrecision = new Decimal(opts.precision)
         const maxFractLengthByPrecision = (exponent.greaterThan(0)
             ? decPrecision.minus(exponent)
             : decPrecision) || new Decimal(0)
@@ -351,8 +354,8 @@ export default class Base
             : roundedIntVal), opts)
         
         const encodedFractVal =
-            (opts.minimumFractionDigits! > roundedFractVal.length
-                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits!-roundedFractVal.length), opts.fractionPadCharacter)]
+            (opts.minimumFractionDigits > roundedFractVal.length
+                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits-roundedFractVal.length), opts.fractionPadCharacter)]
                 : roundedFractVal)
             .map(n => this.encodeDigit(n))
             .join('')
@@ -365,12 +368,12 @@ export default class Base
             || (opts.signDisplay == "never" && '')
             || isNegative ? signSymbol : ''
         
-        const encodedExponent = !exponent.equals(0) ? (opts.scientificNotationCharacter! + 
+        const encodedExponent = !exponent.equals(0) ? (opts.scientificNotationCharacter + 
             this.encode(exponent, {...options, notation: 'standard', fractionDigits: 0})) : ''
         
         const outputValue = outputSignSymbol
         + encodedIntVal
-        + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter! + encodedFractVal) : '')
+        + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
         + (makeExponential ? encodedExponent : '')
         
         return outputValue
@@ -378,11 +381,11 @@ export default class Base
 
     decode(encodedValue: string, options?: Options): number
     {
-        const opts: Options = {...this.options, ...options}
+        const opts: Properties = {...this.options, ...options}
 
         const isNegative = encodedValue.startsWith(opts.negativeSign)
 
-        const notationIndex = encodedValue.indexOf(opts.scientificNotationCharacter!)
+        const notationIndex = encodedValue.indexOf(opts.scientificNotationCharacter)
 
         const exponent = notationIndex >= 0 ? this.decode(encodedValue.slice(notationIndex+1)) : 0
         const intFractValue = notationIndex >= 0 ? encodedValue.slice(0,notationIndex) : encodedValue
@@ -394,7 +397,7 @@ export default class Base
             .replaceAll(opts.digitSeparator, '')
             .trim()
 
-        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter!)
+        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter)
         const largestExponent = (radixCharIndex >= 0 ? radixCharIndex : cleanedValue.length) - 1
 
         let decodedValue = cleanedValue
