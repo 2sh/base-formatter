@@ -86,7 +86,6 @@ export default class NumRadix
 
         const u = (v: string): string => v ? '\\u' + v.charCodeAt(0).toString(16).padStart(4, '0') : ''
         const uDigits = this.digits.map(d => u(d)).join('')
-        const digitPattern = '[' + uDigits + ']+'
         const signPattern = '['
             + u(this.options.negativeSign)
             + u(this.options.positiveSign)
@@ -101,12 +100,12 @@ export default class NumRadix
         + ']+'
         + '(?:'
             + u(this.options.radixCharacter)
-            + digitPattern
+            + '[' + uDigits + ']*'
         + ')?'
         + '(?:'
             + u(this.options.scientificNotationCharacter)
             + signPattern
-            + digitPattern
+            + '[' + uDigits + ']+'
         + ')?'
         + '$'
         this.reValid = new RegExp(pattern)
@@ -114,24 +113,24 @@ export default class NumRadix
 
     static byBase(base: number, options?: Options)
     {
-        return new NumRadix(
+        return new BaseFormat(
             (numbers + asciiUppercase + asciiLowercase).slice(0, base),
             options)
     }
 
-    static binary(options?: Options) { return new NumRadix('01', options) }
-    static octal(options?: Options) { return new NumRadix(numbers.slice(0,8), options)}
-    static decimal(options?: Options) { return new NumRadix(numbers, options) }
-    static hexadecimal(options?: Options) { return new NumRadix(numbers + "ABCDEF", options) }
+    static binary(options?: Options) { return new BaseFormat('01', options) }
+    static octal(options?: Options) { return new BaseFormat(numbers.slice(0,8), options)}
+    static decimal(options?: Options) { return new BaseFormat(numbers, options) }
+    static hexadecimal(options?: Options) { return new BaseFormat(numbers + "ABCDEF", options) }
     static dozenal(options?: Options)
-        { return new NumRadix(numbers + '↊↋', {radixCharacter: ';', ...options}) }
+        { return new BaseFormat(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     static dozenalInitials(options?: Options)
-        { return new NumRadix(numbers + 'TE', {radixCharacter: ';', ...options}) }
+        { return new BaseFormat(numbers + 'TE', {radixCharacter: ';', ...options}) }
     static dozenalRoman(options?: Options)
-        { return new NumRadix(numbers + 'XE', {radixCharacter: ';', ...options}) }
+        { return new BaseFormat(numbers + 'XE', {radixCharacter: ';', ...options}) }
     static duodecimal(options?: Options)
-        { return new NumRadix(numbers + 'AB', {...options}) }
-    static vigesimal(options?: Options) { return new NumRadix(numbers + "ABCDEFGHJK", options) }
+        { return new BaseFormat(numbers + 'AB', {...options}) }
+    static vigesimal(options?: Options) { return new BaseFormat(numbers + "ABCDEFGHJK", options) }
     static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -140,7 +139,7 @@ export default class NumRadix
             .replace('1', '')
             .replace('O', '')
             .replace('0', '')
-        return new NumRadix(digits, options)
+        return new BaseFormat(digits, options)
     }
     static base58(options?: Options)
     {
@@ -149,14 +148,14 @@ export default class NumRadix
             .replace('l', '')
             .replace('O', '')
             .replace('0', '')
-        return new NumRadix(digits, options)
+        return new BaseFormat(digits, options)
     }
     static cuneiform(options?: Options)
         {
             const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
             const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
             const digits = tens.map(t => ones.map(o => t + o)).flat()
-            return new NumRadix(digits,
+            return new BaseFormat(digits,
             {
                 radixCharacter: ';',
                 integerPadCharacter: ' ',
@@ -166,7 +165,7 @@ export default class NumRadix
             })
         }
     static base62(options?: Options)
-        { return new NumRadix(numbers + asciiUppercase + asciiLowercase, options) }
+        { return new BaseFormat(numbers + asciiUppercase + asciiLowercase, options) }
     static domino(options?: Options)
     {
         const chars =
@@ -177,7 +176,7 @@ export default class NumRadix
          + '🁿🂀🂁🂂🂃🂄🂅🁍🁎🁏🁐🁑🁒🁓'
          + '🂆🂇🂈🂉🂊🂋🂌🁔🁕🁖🁗🁘🁙🁚'
          + '🂍🂎🂏🂐🂑🂒🂓🁛🁜🁝🁞🁟🁠🁡'
-        return new NumRadix(chars,
+        return new BaseFormat(chars,
         {
             radixCharacter: '🁢',
             negativeSign: '🀰',
