@@ -17,7 +17,7 @@
   ],
   "repository" : {
     "type": "git",
-    "url": "https://github.com/2sh/base-converter.git"
+    "url": "https://github.com/2sh/base-formatter.git"
   },
   "main": "dist/base-formatter.js",
   "types": "dist/base-formatter.d.ts",
