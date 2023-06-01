@@ -38,6 +38,7 @@ export type DecimalDisplay =
 export type Notation = // todo: look into 'engineering' and 'compact' and whether to implement them
       'standard'
     | 'scientific'
+    | 'engineering'
 
 export type UseGrouping =
       false
@@ -76,6 +77,8 @@ function createPadArray(amount: Decimal, character: string): string[]
     return Array(amount.toNumber()).fill(character)
 }
 
+const zero = new Decimal(0)
+
 const numbers = '0123456789'
 const asciiUppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
@@ -86,6 +89,7 @@ export default class Base
     public readonly base: number
     public readonly options: Properties
     private readonly lnBase: Decimal
+    private readonly lnBase3: Decimal
     private readonly reValid: RegExp
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
@@ -96,6 +100,7 @@ export default class Base
         this.digits = typeof digits === 'string' ? [...digits] : digits
         this.base = this.digits.length
         this.lnBase = new Decimal(this.base).ln()
+        this.lnBase3 = new Decimal(Math.pow(this.base, 3)).ln()
         this.options = {
             radixCharacter: '.',
             negativeSign: '-',
@@ -238,10 +243,11 @@ export default class Base
         })
     }
 
-    private calculateExponent(value: Decimal): Decimal
+
+    private calculateExponent(value: Decimal, isEngineering: boolean = false): Decimal
     {
         if (value.equals(0)) return value
-        return value.ln().dividedBy(this.lnBase).floor()
+        return value.ln().dividedBy(isEngineering ? this.lnBase3 :this.lnBase).floor().times(isEngineering ? 3 : 1)
     }
 
     private convertIntegerToBase(value: Decimal): Decimal[]
@@ -332,18 +338,20 @@ export default class Base
         const isNegative = decVal.isNegative()
         const absVal = decVal.absoluteValue()
         
-        const exponent = this.calculateExponent(absVal)
+        const exponent = this.calculateExponent(absVal, opts.notation === 'engineering')
+        
+        const makeExponential = opts.notation !== 'standard' && !exponent.equals(0)
+        const expValue = makeExponential ? (absVal.dividedBy(Decimal.pow(this.base, exponent))) : absVal
+
+        const precisionExponent = makeExponential ? exponent : zero
 
         const decPrecision = new Decimal(opts.precision)
-        const maxFractLengthByPrecision = (exponent.greaterThan(0)
-            ? decPrecision.minus(exponent)
-            : decPrecision) || new Decimal(0)
+        const maxFractLengthByPrecision = (precisionExponent.greaterThan(0)
+            ? decPrecision.minus(precisionExponent)
+            : decPrecision) || zero
         const maxFractionalLength = (typeof opts.maximumFractionDigits == "number"
             ? Decimal.min(opts.maximumFractionDigits, maxFractLengthByPrecision)
             : maxFractLengthByPrecision)
-        
-        const makeExponential = opts.notation === 'scientific' && !exponent.equals(0)
-        const expValue = makeExponential ? (absVal.dividedBy(Decimal.pow(this.base, exponent))) : absVal
 
         const intVal = expValue.floor()
         const fractVal = expValue.minus(intVal)
@@ -377,7 +385,7 @@ export default class Base
             }
 
             if (isRemainder)
-                value = new Decimal(0)
+                value = zero
 
             if (isRounded)
                 onlyZeros = true
@@ -417,13 +425,14 @@ export default class Base
             || (opts.signDisplay == "never" && '')
             || isNegative ? signSymbol : ''
         
-        const encodedExponent = !exponent.equals(0) ? (opts.scientificNotationCharacter + 
-            this.encode(exponent, {...options, notation: 'standard', fractionDigits: 0})) : ''
+        const encodedExponent = makeExponential && !exponent.equals(0)
+            ? (opts.scientificNotationCharacter + this.encode(exponent, {...options, notation: 'standard', fractionDigits: 0}))
+            : ''
         
         const outputValue = outputSignSymbol
         + encodedIntVal
         + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
-        + (makeExponential ? encodedExponent : '')
+        + encodedExponent
         
         return outputValue
     }

@@ -57,6 +57,7 @@ console.log()
 console.log("Physical Constants")
 console.log("c  =", base.encode(299792458, {useGrouping: true}), "m/s")
 console.log("c  =", base.encode(299792458, {notation: 'scientific', fractionDigits: 2}), "m/s")
+console.log("c  =", base.encode(299792458, {notation: 'engineering', fractionDigits: 2}), "m/s")
 console.log("e  =", base.encode(1.6021766208*10**-19, {notation: 'scientific', fractionDigits: 8}), "C")
 console.log()
 
