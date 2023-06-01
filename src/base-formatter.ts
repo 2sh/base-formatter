@@ -12,6 +12,16 @@ import Decimal from 'decimal.js'
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
+type RoundingMode = 'ceil'
+| 'floor'
+| 'expand'
+| 'trunc'
+| 'halfCeil'
+| 'halfFloor'
+| 'halfExpand'
+| 'halfTrunc'
+| 'halfEven'
+
 type Properties =
 {
     radixCharacter: string
@@ -26,8 +36,12 @@ type Properties =
 
     // formatting
     decimalDisplay: 'auto' | 'always' // auto: if fraction
-    signDisplay: 'auto' | 'always' | 'exceptZero' | 'negative' | 'never'
-    roundingMode: 'ceil' | 'floor' | 'trunc' | 'halfExpand' // todo: add more and make sure the implemented ones are correct
+    signDisplay: 'auto'
+        | 'always'
+        | 'exceptZero'
+        | 'negative'
+        | 'never'
+    roundingMode: RoundingMode
     precision: number
     fractionDigits: number | null // exact number of fraction Digits
     minimumFractionDigits: number
@@ -53,13 +67,18 @@ export default class Base
     public readonly base: number
     public readonly options: Properties
     private readonly lnBase: Decimal
+    private readonly halfBase: Decimal
     private readonly reValid: RegExp
+    private readonly roundingModes: {
+        [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
+    }
 
     constructor(digits: string[] | string, options?: Options)
     {
         this.digits = typeof digits === 'string' ? [...digits] : digits
         this.base = this.digits.length
         this.lnBase = (new Decimal(this.base)).ln()
+        this.halfBase = new Decimal(this.base).dividedBy(2)
         this.options = {
             radixCharacter: '.',
             negativeSign: '-',
@@ -73,7 +92,7 @@ export default class Base
 
             decimalDisplay: 'auto',
             signDisplay: 'auto',
-            roundingMode: 'halfExpand',
+            roundingMode: 'halfTrunc',
             precision: 32,
             fractionDigits: null,
             minimumFractionDigits: 0,
@@ -110,6 +129,20 @@ export default class Base
         + ')?'
         + '$'
         this.reValid = new RegExp(pattern)
+        
+        this.roundingModes = {
+            expand: () => true,
+            trunc: () => false,
+            ceil: (_, isNegative) => !isNegative,
+            floor: (_, isNegative) => isNegative,
+            halfExpand: (value) => value.greaterThanOrEqualTo(this.halfBase),
+            halfTrunc: (value) => value.greaterThan(this.halfBase),
+            halfCeil: (value, isNegative) => value.greaterThanOrEqualTo(this.halfBase) ? !isNegative : isNegative,
+            halfFloor: (value, isNegative) => value.greaterThan(this.halfBase) ? isNegative : !isNegative,
+            halfEven: (value, _, i, values) => value.equals(this.halfBase)
+                ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(1)
+                : value.greaterThan(this.halfBase)
+        }
     }
 
     static byBase(base: number, options?: Options)
@@ -319,13 +352,8 @@ export default class Base
             }
             else if (isRounded)
             {
-                if (opts.roundingMode === 'halfExpand')
-                    isRemainder = value.greaterThanOrEqualTo(this.base/2)
-                else if (opts.roundingMode === 'ceil')
-                    isRemainder = !isNegative
-                else if (opts.roundingMode === 'floor')
-                    isRemainder = isNegative
-                // trunc, no remainder
+                if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
+                    isRemainder = true
             }
 
             if (isRemainder)

@@ -2,18 +2,30 @@ import Decimal from 'decimal.js'
 
 import Base from '../src/base-formatter'
 
-//const base = Base.decimal()
+const base = Base.decimal()
 //const base = Base.hexadecimal()
 //const base = Base.base62()
-const base = Base.dozenal()
+//const base = Base.dozenal()
 //const base = Base.cuneiform()
 //const base = Base.domino()
 
 // Base Demonstration
 
-const value = base.encode(300001, {notation: 'scientific', maximumFractionDigits: 10})
+const roundingModes: (typeof base.options.roundingMode)[] = ['expand', 'trunc', 'ceil', 'floor', 'halfCeil', 'halfFloor', 'halfExpand', 'halfTrunc', 'halfEven']
+const testNumbers = [5.5, 2.5, 1.6, 1.1, 1.0, -1.0, -1.1, -1.6, -2.5, -5.5]
 
-console.log(value, base.isNumber(value)) // todo: remove 0s in value
+console.log('numbers'.padStart(12, ' ') + ':', ...testNumbers.map(v => v.toString()))
+roundingModes.forEach(mode =>
+{
+	const e = (v: number) => base.encode(v,
+	{
+		fractionDigits: 0,
+		roundingMode: mode,
+	}).padEnd(v.toString().length, ' ')
+
+	console.log(mode.padStart(12, ' ') + ':', ...testNumbers.map(e))
+})
+console.log()
 
 console.log("Multiplication Table")
 
