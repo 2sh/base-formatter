@@ -47,30 +47,35 @@ roundingModes.forEach(mode =>
 console.log()
 
 console.log("Mathematical Constants")
-console.log("π  =", base.encode(Math.PI, {fractionDigits: 14}))
-console.log("τ  =", base.encode(2*Math.PI, {fractionDigits: 13}))
-console.log("e  =", base.encode(Math.E, {fractionDigits: 12}))
+console.log(" π =", base.encode(Math.PI, {fractionDigits: 14}))
+console.log(" τ =", base.encode(2*Math.PI, {fractionDigits: 13}))
+console.log(" e =", base.encode(Math.E, {fractionDigits: 12}))
 console.log("√2 =", base.encode(Math.sqrt(2), {fractionDigits: 11}))
-console.log("ϕ  =", base.encode((1+Math.sqrt(5))/2, {fractionDigits: 10}))
+console.log(" ϕ =", base.encode((1+Math.sqrt(5))/2, {fractionDigits: 10}))
 console.log()
 
 console.log("Physical Constants")
-console.log("c  =", base.encode(299792458, {useGrouping: true}), "m/s")
-console.log("c  =", base.encode(299792458, {notation: 'scientific', fractionDigits: 2}), "m/s")
-console.log("c  =", base.encode(299792458, {notation: 'engineering', fractionDigits: 2}), "m/s")
-console.log("e  =", base.encode(1.6021766208*10**-19, {notation: 'scientific', fractionDigits: 8}), "C")
+console.log(" c =", base.encode(299792458, {useGrouping: true}), "m/s")
+console.log(" c =", base.encode(299792458, {notation: 'scientific', fractionDigits: 2}), "m/s")
+console.log(" c =", base.encode(299792458, {notation: 'engineering', fractionDigits: 2}), "m/s")
+console.log(" e =", base.encode(1.6021766208*10**-19, {notation: 'scientific', fractionDigits: 8}), "C")
 console.log()
 
 console.log("Fractions")
-for (let i=2; i<size; i++)
+const fractions = [
+	[1, 2], [1, 3], [2, 3], [1, 4], [3, 4],
+	[1, 5], [1, 6], [5, 6], [1, 8], [3, 8], [7, 8], [4, 9],
+	[1, 10], [3, 10], [1, 12], [1, 16], [1, 32]]
+fractions.forEach(([num, dem]) =>
 {
-	console.log('1/' + i.toString().padStart(2, '0') + ' = '
-		+ base.encode((new Decimal(1)).dividedBy(i), {fractionDigits: 4}))
-}
+	console.log(
+		(num.toString() + '/' + dem.toString()).padStart(4, ' '),
+		'=',
+		base.encode(new Decimal(num).dividedBy(dem), {maximumFractionDigits: 8}))
+})
 console.log()
 
 console.log("Date & Time")
-
 const dateString = (date: Date, iso: boolean) =>
 {   const u = iso ? 'UTC' : ''
     const p = [
