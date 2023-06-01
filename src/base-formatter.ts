@@ -35,7 +35,7 @@ export type DecimalDisplay =
       'auto' // if fraction
     | 'always'
 
-export type Notation = // todo: look into 'engineering' and 'compact' and whether to implement them
+export type Notation = // todo: look into 'compact' and whether to implement them
       'standard'
     | 'scientific'
     | 'engineering'
