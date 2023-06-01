@@ -12,15 +12,38 @@ import Decimal from 'decimal.js'
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
-type RoundingMode = 'ceil'
-| 'floor'
-| 'expand'
-| 'trunc'
-| 'halfCeil'
-| 'halfFloor'
-| 'halfExpand'
-| 'halfTrunc'
-| 'halfEven'
+export type RoundingMode =
+      'ceil'
+    | 'floor'
+    | 'expand'
+    | 'trunc'
+    | 'halfCeil'
+    | 'halfFloor'
+    | 'halfExpand'
+    | 'halfTrunc'
+    | 'halfEven'
+    | 'halfOdd'
+
+export type SignDisplay =
+      'auto'
+    | 'always'
+    | 'exceptZero'
+    | 'negative'
+    | 'never'
+
+export type DecimalDisplay =
+      'auto' // if fraction
+    | 'always'
+
+export type Notation = // todo: look into 'engineering' and 'compact' and whether to implement them
+      'standard'
+    | 'scientific'
+
+export type UseGrouping =
+      false
+    | true
+    | 'always'
+    | 'min2'
 
 type Properties =
 {
@@ -35,20 +58,16 @@ type Properties =
     fractionPadCharacter: string | null
 
     // formatting
-    decimalDisplay: 'auto' | 'always' // auto: if fraction
-    signDisplay: 'auto'
-        | 'always'
-        | 'exceptZero'
-        | 'negative'
-        | 'never'
+    decimalDisplay: DecimalDisplay
+    signDisplay: SignDisplay
     roundingMode: RoundingMode
     precision: number
     fractionDigits: number | null // exact number of fraction Digits
     minimumFractionDigits: number
     maximumFractionDigits: number | null // if not number, no limit other than precision
     minimumIntegerDigits: number // zero padding
-    notation: 'standard' | 'scientific' // todo: look into 'engineering' and 'compact' and whether to implement them
-    useGrouping: false | true | "always" | 'min2'
+    notation: Notation
+    useGrouping: UseGrouping
 }
 type Options = Partial<Properties>
 
@@ -67,7 +86,6 @@ export default class Base
     public readonly base: number
     public readonly options: Properties
     private readonly lnBase: Decimal
-    private readonly halfBase: Decimal
     private readonly reValid: RegExp
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
@@ -77,8 +95,7 @@ export default class Base
     {
         this.digits = typeof digits === 'string' ? [...digits] : digits
         this.base = this.digits.length
-        this.lnBase = (new Decimal(this.base)).ln()
-        this.halfBase = new Decimal(this.base).dividedBy(2)
+        this.lnBase = new Decimal(this.base).ln()
         this.options = {
             radixCharacter: '.',
             negativeSign: '-',
@@ -130,18 +147,22 @@ export default class Base
         + '$'
         this.reValid = new RegExp(pattern)
         
+        const halfBase = new Decimal(this.base).dividedBy(2)
         this.roundingModes = {
             expand: () => true,
             trunc: () => false,
             ceil: (_, isNegative) => !isNegative,
             floor: (_, isNegative) => isNegative,
-            halfExpand: (value) => value.greaterThanOrEqualTo(this.halfBase),
-            halfTrunc: (value) => value.greaterThan(this.halfBase),
-            halfCeil: (value, isNegative) => value.greaterThanOrEqualTo(this.halfBase) ? !isNegative : isNegative,
-            halfFloor: (value, isNegative) => value.greaterThan(this.halfBase) ? isNegative : !isNegative,
-            halfEven: (value, _, i, values) => value.equals(this.halfBase)
+            halfExpand: (value) => value.greaterThanOrEqualTo(halfBase),
+            halfTrunc: (value) => value.greaterThan(halfBase),
+            halfCeil: (value, isNegative) => value.greaterThanOrEqualTo(halfBase) ? !isNegative : isNegative,
+            halfFloor: (value, isNegative) => value.greaterThan(halfBase) ? isNegative : !isNegative,
+            halfEven: (value, _, i, values) => value.equals(halfBase)
                 ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(1)
-                : value.greaterThan(this.halfBase)
+                : value.greaterThan(halfBase),
+            halfOdd: (value, _, i, values) => value.equals(halfBase)
+                ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(0)
+                : value.greaterThan(halfBase),
         }
     }
 
@@ -352,8 +373,7 @@ export default class Base
             }
             else if (isRounded)
             {
-                if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
-                    isRemainder = true
+                isRemainder = this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal)
             }
 
             if (isRemainder)

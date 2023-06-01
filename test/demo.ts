@@ -1,3 +1,5 @@
+import type { RoundingMode } from '../src/base-formatter'
+
 import Decimal from 'decimal.js'
 
 import Base from '../src/base-formatter'
@@ -11,7 +13,7 @@ const base = Base.decimal()
 
 // Base Demonstration
 
-const roundingModes: (typeof base.options.roundingMode)[] = ['expand', 'trunc', 'ceil', 'floor', 'halfCeil', 'halfFloor', 'halfExpand', 'halfTrunc', 'halfEven']
+const roundingModes: RoundingMode[] = ['expand', 'trunc', 'ceil', 'floor', 'halfCeil', 'halfFloor', 'halfExpand', 'halfTrunc', 'halfEven', 'halfOdd']
 const testNumbers = [5.5, 2.5, 1.6, 1.1, 1.0, -1.0, -1.1, -1.6, -2.5, -5.5]
 
 console.log('numbers'.padStart(12, ' ') + ':', ...testNumbers.map(v => v.toString()))
