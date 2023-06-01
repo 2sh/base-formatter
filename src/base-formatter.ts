@@ -331,12 +331,14 @@ export default class Base
             if (isRemainder)
                 value = new Decimal(0)
 
-            if (!value.isZero())
+            if (isRounded)
+                onlyZeros = true
+            else if (!value.isZero())
                 onlyZeros = false
             
             baseVal[i] = value
             
-            if (isRounded || (onlyZeros && baseIntVal.length < i))
+            if (onlyZeros && baseIntVal.length < i)
                 baseVal.pop()
             else if(!isRemainder)
                 break
