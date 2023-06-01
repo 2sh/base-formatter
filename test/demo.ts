@@ -4,33 +4,17 @@ import Decimal from 'decimal.js'
 
 import Base from '../src/base-formatter'
 
-const base = Base.decimal()
+//const base = Base.decimal()
 //const base = Base.hexadecimal()
 //const base = Base.base62()
 //const base = Base.dozenal()
+const base = Base.duodecimal()
 //const base = Base.cuneiform()
 //const base = Base.domino()
 
 // Base Demonstration
 
-const roundingModes: RoundingMode[] = ['expand', 'trunc', 'ceil', 'floor', 'halfCeil', 'halfFloor', 'halfExpand', 'halfTrunc', 'halfEven', 'halfOdd']
-const testNumbers = [5.5, 2.5, 1.6, 1.1, 1.0, -1.0, -1.1, -1.6, -2.5, -5.5]
-
-console.log('numbers'.padStart(12, ' ') + ':', ...testNumbers.map(v => v.toString()))
-roundingModes.forEach(mode =>
-{
-	const e = (v: number) => base.encode(v,
-	{
-		fractionDigits: 0,
-		roundingMode: mode,
-	}).padEnd(v.toString().length, ' ')
-
-	console.log(mode.padStart(12, ' ') + ':', ...testNumbers.map(e))
-})
-console.log()
-
 console.log("Multiplication Table")
-
 const size = Math.min(20, base.base+1)
 for (let a=1; a<size; a++)
 {
@@ -44,6 +28,22 @@ for (let a=1; a<size; a++)
 	}
 	console.log(line)
 }
+console.log()
+
+console.log("Rounding Modes")
+const roundingModes: RoundingMode[] = ['expand', 'trunc', 'ceil', 'floor', 'halfCeil', 'halfFloor', 'halfExpand', 'halfTrunc', 'halfEven', 'halfOdd']
+const testNumbers = [5.5, 2.5, 1.75, 1.25, 1.0, -1.0, -1.25, -1.75, -2.5, -5.5]
+const baseTestNumber = testNumbers.map(v => base.encode(v, {fractionDigits: 1}))
+
+console.log('numbers'.padStart(12, ' ') + ':', ...baseTestNumber)
+roundingModes.forEach(mode =>
+{
+	console.log(mode.padStart(12, ' ') + ':', ...testNumbers.map((v, i) => base.encode(v,
+	{
+		fractionDigits: 0,
+		roundingMode: mode,
+	}).padEnd(baseTestNumber[i].length, ' ')))
+})
 console.log()
 
 console.log("Mathematical Constants")
