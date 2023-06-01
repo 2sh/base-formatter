@@ -8,12 +8,19 @@
     "email": "contact@2sh.me"
   },
   "keywords": [
+    "formatting",
+    "hexadecimal",
+    "base-conversion",
+    "base58",
+    "base62",
     "radix",
+    "numeral-systems",
     "base",
-    "convert",
-    "format",
-    "encode",
-    "decode"
+    "dozenal",
+    "duodecimal",
+    "base57",
+    "sexagesimal",
+    "vigesimal"
   ],
   "repository": {
     "type": "git",
