@@ -108,15 +108,15 @@ export default class Base<Digits extends string | number>
 
     constructor(digits: Digits, options?: Options)
     {
-        if (typeof digits === 'string')
-        {
-            this.digits = [...digits]
-            this.base = this.digits.length
-        }
-        else
+        if (typeof digits === 'number')
         {
             this.base = digits
             this.digits = null
+        }
+        else
+        {
+            this.digits = typeof digits === 'string' ? [...digits] : digits
+            this.base = this.digits.length
         }
 
         this.options = {
