@@ -72,6 +72,14 @@ type Properties =
 }
 type Options = Partial<Properties>
 
+type NumeralOutput =
+{
+    isNegative: boolean,
+    integer: number[],
+    fractal: number[],
+    exponent: number
+}
+
 function createPadArray(amount: Decimal, character: string): string[]
 {
     return Array(amount.toNumber()).fill(character)
@@ -82,25 +90,35 @@ const zero = new Decimal(0)
 const numbers = '0123456789'
 const asciiUppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
+const allDigits = numbers + asciiUppercase + asciiLowercase
 
-export default class Base
+
+export default class Base<Digits extends string | number>
 {
-    public readonly digits: string[]
+    public readonly digits: string[] | null
     public readonly base: number
     public readonly options: Properties
-    private readonly lnBase: Decimal
-    private readonly lnBase3: Decimal
-    private readonly reValid: RegExp
+    private readonly reValid: RegExp | null
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
     }
+    private readonly lnBase: Decimal
+    private readonly lnBase3: Decimal
+    private readonly baseZero: string
 
-    constructor(digits: string[] | string, options?: Options)
+    constructor(digits: Digits, options?: Options)
     {
-        this.digits = typeof digits === 'string' ? [...digits] : digits
-        this.base = this.digits.length
-        this.lnBase = new Decimal(this.base).ln()
-        this.lnBase3 = new Decimal(Math.pow(this.base, 3)).ln()
+        if (typeof digits === 'string')
+        {
+            this.digits = [...digits]
+            this.base = this.digits.length
+        }
+        else
+        {
+            this.base = digits
+            this.digits = null
+        }
+
         this.options = {
             radixCharacter: '.',
             negativeSign: '-',
@@ -126,31 +144,40 @@ export default class Base
             ...options
         }
 
-        const u = (v: string): string => v ? '\\u' + v.charCodeAt(0).toString(16).padStart(4, '0') : ''
-        const uDigits = this.digits.map(d => u(d)).join('')
-        const signPattern = '['
-            + u(this.options.negativeSign)
-            + u(this.options.positiveSign)
-        + ']?'
+        this.baseZero = this.digits !== null ? this.digits[0] : ' '
+        this.lnBase = new Decimal(this.base).ln()
+        this.lnBase3 = new Decimal(Math.pow(this.base, 3)).ln()
         
-        const pattern = '^'
-        + signPattern
-        + '['
-            + uDigits
-            + u(this.options.digitSeparator)
-            + u(this.options.groupingSeparator)
-        + ']+'
-        + '(?:'
-            + u(this.options.radixCharacter)
-            + '[' + uDigits + ']*'
-        + ')?'
-        + '(?:'
-            + u(this.options.scientificNotationCharacter)
+        if (this.digits !== null)
+        {
+            const u = (v: string): string => v ? '\\u' + v.charCodeAt(0).toString(16).padStart(4, '0') : ''
+            const uDigits = this.digits.map(d => u(d)).join('')
+            const signPattern = '['
+                + u(this.options.negativeSign)
+                + u(this.options.positiveSign)
+            + ']?'
+            
+            const pattern = '^'
             + signPattern
-            + '[' + uDigits + ']+'
-        + ')?'
-        + '$'
-        this.reValid = new RegExp(pattern)
+            + '['
+                + uDigits
+                + u(this.options.digitSeparator)
+                + u(this.options.groupingSeparator)
+            + ']+'
+            + '(?:'
+                + u(this.options.radixCharacter)
+                + '[' + uDigits + ']*'
+            + ')?'
+            + '(?:'
+                + u(this.options.scientificNotationCharacter)
+                + signPattern
+                + '[' + uDigits + ']+'
+            + ')?'
+            + '$'
+            this.reValid = new RegExp(pattern)
+        }
+        else
+            this.reValid = null
         
         const halfBase = new Decimal(this.base).dividedBy(2)
         this.roundingModes = {
@@ -171,24 +198,23 @@ export default class Base
         }
     }
 
-    static byBase(base: number, options?: Options)
+    static digitsByBase(base: number, options?: Options)
     {
-        return new Base(
-            (numbers + asciiUppercase + asciiLowercase).slice(0, base),
-            options)
+        if (base > allDigits.length) throw "Can\'t be higher than " + allDigits.length + " digits"
+        return new Base([...allDigits].slice(0, base).join(''), options)
     }
 
-    static binary(options?: Options) { return Base.byBase(2, options) }
-    static octal(options?: Options) { return Base.byBase(8, options) }
-    static decimal(options?: Options) { return Base.byBase(10, options) }
-    static hexadecimal(options?: Options) { return Base.byBase(16, options) }
+    static binary(options?: Options) { return Base.digitsByBase(2, options) }
+    static octal(options?: Options) { return Base.digitsByBase(8, options) }
+    static decimal(options?: Options) { return Base.digitsByBase(10, options) }
+    static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
     static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
     static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
-    static duodecimal(options?: Options) { return Base.byBase(12, options) }
+    static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
     static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) } // skipping over I
     static base57(options?: Options)
     {
@@ -209,12 +235,12 @@ export default class Base
             .replace('0', '')
         return new Base(digits, options)
     }
-    static sexagesimal(options?: Options) { return Base.byBase(60, options) }
+    static sexagesimal(options?: Options) { return Base.digitsByBase(60, options) }
     static cuneiform(options?: Options)
     {
         const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
         const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
-        const digits = tens.map(t => ones.map(o => t + o)).flat()
+        const digits = tens.map(t => ones.map(o => t + o)).flat().join('')
         return new Base(digits,
         {
             radixCharacter: ';',
@@ -224,7 +250,7 @@ export default class Base
             ...options
         })
     }
-    static base62(options?: Options) { return Base.byBase(62, options) }
+    static base62(options?: Options) { return Base.digitsByBase(62, options) }
     static domino(options?: Options)
     {
         const chars =
@@ -307,24 +333,27 @@ export default class Base
 
     private encodeDigit(value: Decimal | string): string
     {
+        if (this.digits === null) throw 'No digits'
         if (typeof value === 'string') return value
         return this.digits[value.toNumber()]
     }
 
     private decodeDigit(value: string): number
     {
+        if (this.digits === null) throw 'No digits'
         const digitIndex = this.digits.indexOf(value)
         if (!(digitIndex >= 0)) throw 'Invalid digit'
         return digitIndex
     }
 
-    public encode(numberValue: number | string | Decimal, options?: Options): string
+    public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
+    public encode(numberValue: number | string | Decimal, options?: Options): NumeralOutput | string
     {
         const opts: Properties = {...this.options, ...options}
         if (typeof opts.integerPadCharacter !== "string")
-            opts.integerPadCharacter = this.digits[0]
+            opts.integerPadCharacter = this.baseZero
         if (typeof opts.fractionPadCharacter !== "string")
-            opts.fractionPadCharacter = this.digits[0]
+            opts.fractionPadCharacter = this.baseZero
         if (opts.fractionDigits !== null)
         {
             opts.maximumFractionDigits = opts.fractionDigits
@@ -407,42 +436,56 @@ export default class Base
         const roundedIntVal = baseVal.slice(0, nullPos) as Decimal[]
         const roundedFractVal = baseVal.slice(nullPos+1) as Decimal[]
 
-        const encodedIntVal = this.encodeInteger(
-            (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
-            ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
-            : roundedIntVal), opts)
-        
-        const encodedFractVal =
-            (opts.minimumFractionDigits > roundedFractVal.length
-                ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits-roundedFractVal.length), opts.fractionPadCharacter)]
-                : roundedFractVal)
-            .map(n => this.encodeDigit(n))
-            .join('')
-        
-        const signSymbol = isNegative ? opts.negativeSign : opts.positiveSign
-        const outputSignSymbol = 
-            (opts.signDisplay == "always" && signSymbol)
-            || (opts.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
-            || (opts.signDisplay == "negative" && decVal.lessThan(0) && signSymbol)
-            || (opts.signDisplay == "never" && '')
-            || isNegative ? signSymbol : ''
-        
-        const encodedExponent = makeExponential && !exponent.equals(0)
-            ? (opts.scientificNotationCharacter + this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}))
-            : ''
-        
-        const outputValue =
-        outputSignSymbol
-        + encodedIntVal
-        + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
-        + encodedExponent
-        
-        return outputValue
+        if (this.digits !== null)
+        {
+            const encodedIntVal = this.encodeInteger(
+                (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
+                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
+                : roundedIntVal), opts)
+            
+            const encodedFractVal =
+                (opts.minimumFractionDigits > roundedFractVal.length
+                    ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits-roundedFractVal.length), opts.fractionPadCharacter)]
+                    : roundedFractVal)
+                .map(n => this.encodeDigit(n))
+                .join('')
+            
+            const signSymbol = isNegative ? opts.negativeSign : opts.positiveSign
+            const outputSignSymbol = 
+                (opts.signDisplay == "always" && signSymbol)
+                || (opts.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
+                || (opts.signDisplay == "negative" && decVal.lessThan(0) && signSymbol)
+                || (opts.signDisplay == "never" && '')
+                || isNegative ? signSymbol : ''
+            
+            const encodedExponent = makeExponential && !exponent.equals(0)
+                ? (opts.scientificNotationCharacter + this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}))
+                : ''
+            
+            return outputSignSymbol
+                + encodedIntVal
+                + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
+                + encodedExponent
+        }
+        else
+        {
+            return {
+                isNegative,
+                integer: roundedIntVal.map(v => v.toNumber()),
+                fractal: roundedFractVal.map(v => v.toNumber()),
+                exponent: exponent.toNumber()
+            }
+        }
     }
 
-    decode(encodedValue: string, options?: Options): number
+    decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
         const opts: Properties = {...this.options, ...options}
+
+        if (typeof encodedValue !== "string")
+        {
+            return 0
+        }
 
         const isNegative = encodedValue.startsWith(opts.negativeSign)
 
@@ -472,6 +515,7 @@ export default class Base
 
     isNumber(value: string): boolean
     {
+        if (this.reValid === null) throw 'No digits defined for isNumber check'
         return this.reValid.test(value)
     }
 }
