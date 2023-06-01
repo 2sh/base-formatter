@@ -426,10 +426,11 @@ export default class Base
             || isNegative ? signSymbol : ''
         
         const encodedExponent = makeExponential && !exponent.equals(0)
-            ? (opts.scientificNotationCharacter + this.encode(exponent, {...options, notation: 'standard', fractionDigits: 0}))
+            ? (opts.scientificNotationCharacter + this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}))
             : ''
         
-        const outputValue = outputSignSymbol
+        const outputValue =
+        outputSignSymbol
         + encodedIntVal
         + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
         + encodedExponent
