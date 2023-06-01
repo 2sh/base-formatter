@@ -14,6 +14,7 @@ const base = Base.duodecimal()
 
 // Base Demonstration
 
+console.log()
 console.log("Multiplication Table")
 const size = Math.min(20, base.base+1)
 for (let a=1; a<size; a++)
@@ -35,10 +36,10 @@ const roundingModes: RoundingMode[] = ['expand', 'trunc', 'ceil', 'floor', 'half
 const testNumbers = [5.5, 2.5, 1.75, 1.25, 1.0, -1.0, -1.25, -1.75, -2.5, -5.5]
 const baseTestNumber = testNumbers.map(v => base.encode(v, {fractionDigits: 1}))
 
-console.log('numbers'.padStart(12, ' ') + ':', ...baseTestNumber)
+console.log('numbers'.padStart(11, ' ') + ':', ...baseTestNumber)
 roundingModes.forEach(mode =>
 {
-	console.log(mode.padStart(12, ' ') + ':', ...testNumbers.map((v, i) => base.encode(v,
+	console.log(mode.padStart(11, ' ') + ':', ...testNumbers.map((v, i) => base.encode(v,
 	{
 		fractionDigits: 0,
 		roundingMode: mode,
@@ -52,13 +53,21 @@ console.log(" τ =", base.encode(2*Math.PI, {fractionDigits: 13}))
 console.log(" e =", base.encode(Math.E, {fractionDigits: 12}))
 console.log("√2 =", base.encode(Math.sqrt(2), {fractionDigits: 11}))
 console.log(" ϕ =", base.encode((1+Math.sqrt(5))/2, {fractionDigits: 10}))
+
 console.log()
 
 console.log("Physical Constants")
 console.log(" c =", base.encode(299792458, {useGrouping: true}), "m/s")
 console.log(" c =", base.encode(299792458, {notation: 'scientific', fractionDigits: 2}), "m/s")
 console.log(" c =", base.encode(299792458, {notation: 'engineering', fractionDigits: 2}), "m/s")
-console.log(" e =", base.encode(1.6021766208*10**-19, {notation: 'scientific', fractionDigits: 8}), "C")
+console.log(" e =", base.encode(1.6021766208e-19, {notation: 'scientific', fractionDigits: 8}), "C")
+console.log(" G =", base.encode(6.6743e11, {notation: 'scientific', fractionDigits: 4}), "m^3 kg^-1 s^-2")
+console.log(" h =", base.encode(6.62607015e-34, {notation: 'scientific', fractionDigits: 8}), "m^2 kg/s")
+console.log()
+
+console.log("Other")
+console.log("5e-1 =", base.encode(5e-1, {notation: 'scientific', maximumFractionDigits: 3}))
+console.log(" 1/3 =", base.encode(1/3, {minimumIntegerDigits: 3, minimumFractionDigits: 3}))
 console.log()
 
 console.log("Fractions")
@@ -92,3 +101,4 @@ const dateString = (date: Date, iso: boolean) =>
 const d = new Date()
 console.log('Local: ' + dateString(d, false))
 console.log('UTC:   ' + dateString(d, true))
+console.log()
