@@ -118,7 +118,7 @@ export default class Base
             precision: 32,
             fractionDigits: null,
             minimumFractionDigits: 0,
-            maximumFractionDigits: null,
+            maximumFractionDigits: 8,
             minimumIntegerDigits: 0,
             notation: 'standard',
             useGrouping: false,
@@ -154,10 +154,10 @@ export default class Base
         
         const halfBase = new Decimal(this.base).dividedBy(2)
         this.roundingModes = {
-            expand: () => true,
+            expand: (value) => value.greaterThan(0),
             trunc: () => false,
-            ceil: (_, isNegative) => !isNegative,
-            floor: (_, isNegative) => isNegative,
+            ceil: (value, isNegative) => !isNegative && value.greaterThan(0),
+            floor: (value, isNegative) => isNegative && value.greaterThan(0),
             halfExpand: (value) => value.greaterThanOrEqualTo(halfBase),
             halfTrunc: (value) => value.greaterThan(halfBase),
             halfCeil: (value, isNegative) => value.greaterThanOrEqualTo(halfBase) ? !isNegative : isNegative,
@@ -379,9 +379,11 @@ export default class Base
                 value = value.plus(1)
                 isRemainder = value.greaterThanOrEqualTo(this.base)
             }
-            else if (isRounded)
+            
+            if (!isRemainder && isRounded)
             {
-                isRemainder = this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal)
+                if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
+                    isRemainder = true
             }
 
             if (isRemainder)
