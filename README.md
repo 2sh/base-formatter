@@ -3,17 +3,6 @@ A Javascript library for encoding numbers to different radixes/bases with many f
 
 The encoder takes various options to adjust the formatting of the output base number as a string, such as the characters to use for the various symbols (radix character, signs, separators), integer and fraction lengths, padding, grouping, scientific and engineering notation and rounding mode. The base can be any number as long as the digits are specified: 0123456789ABCD...
 
-## Installation
-With NPM:
-```bash
-npm install base-formatter
-```
-
-With Yarn:
-```bash
-yarn add base-formatter
-```
-
 ## Use
 ```js
 import Base from 'base-formatter'
