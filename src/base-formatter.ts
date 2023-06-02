@@ -187,8 +187,8 @@ export default class Base<Digits extends string | number>
             floor: (value, isNegative) => isNegative && value.greaterThan(0),
             halfExpand: (value) => value.greaterThanOrEqualTo(halfBase),
             halfTrunc: (value) => value.greaterThan(halfBase),
-            halfCeil: (value, isNegative) => value.greaterThanOrEqualTo(halfBase) ? !isNegative : isNegative,
-            halfFloor: (value, isNegative) => value.greaterThan(halfBase) ? isNegative : !isNegative,
+            halfCeil: (value, isNegative) => !isNegative ? value.greaterThanOrEqualTo(halfBase) : value.greaterThan(halfBase),
+            halfFloor: (value, isNegative) => isNegative ? value.greaterThanOrEqualTo(halfBase) : value.greaterThan(halfBase),
             halfEven: (value, _, i, values) => value.equals(halfBase)
                 ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(1)
                 : value.greaterThan(halfBase),
@@ -364,7 +364,7 @@ export default class Base<Digits extends string | number>
             : opts.minimumFractionDigits
         
         const decVal = new Decimal(numberValue)
-        const isNegative = decVal.isNegative()
+        let isNegative = decVal.isNegative()
         const absVal = decVal.absoluteValue()
         
         const exponent = this.calculateExponent(absVal, opts.notation === 'engineering')
@@ -435,6 +435,10 @@ export default class Base<Digits extends string | number>
         const nullPos = baseVal.findIndex(e => e == null)
         const roundedIntVal = baseVal.slice(0, nullPos) as Decimal[]
         const roundedFractVal = baseVal.slice(nullPos+1) as Decimal[]
+
+        // if the value became zero through rounding, make no longer negative
+        if (!decVal.isZero() && baseVal.every((v) => v === null || v.isZero()))
+            isNegative = false
 
         if (this.digits !== null)
         {

@@ -1,4 +1,4 @@
-import type { Options } from '../src/base-formatter'
+import type { Options, RoundingMode } from '../src/base-formatter'
 
 import test from 'tape'
 
@@ -72,5 +72,54 @@ test('encoding', (t) =>
     t.equal(dozenal.encode(51240.6666666666666666, {maximumFractionDigits: 8}), '257↊0;8')
     t.equal(domino.encode(51234.2345334554234, {maximumFractionDigits: 8}), '🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻')
 
+    t.end()
+})
+
+const testNumbers1 =
+                   [5.5, 2.5, 1.75, 1.25, 1.0, -1.0, -1.25, -1.75, -2.5, -5.5]
+const roundingModesExpected1: [RoundingMode, string[]][] = [
+    ['ceil',      ['6', '3', '2',  '2',  '1', '-1', '-1',  '-1',  '-2', '-5']], // towards +
+    ['floor',     ['5', '2', '1',  '1',  '1', '-1', '-2',  '-2',  '-3', '-6']], // towards -
+    ['expand',    ['6', '3', '2',  '2',  '1', '-1', '-2',  '-2',  '-3', '-6']], // away from 0
+    ['trunc',     ['5', '2', '1',  '1',  '1', '-1', '-1',  '-1',  '-2', '-5']], // towards 0
+    ['halfCeil',  ['6', '3', '2',  '1',  '1', '-1', '-1',  '-2',  '-2', '-5']], // half to +
+    ['halfFloor', ['5', '2', '2',  '1',  '1', '-1', '-1',  '-2',  '-3', '-6']], // half to -
+    ['halfExpand',['6', '3', '2',  '1',  '1', '-1', '-1',  '-2',  '-3', '-6']], // half away from 0
+    ['halfTrunc', ['5', '2', '2',  '1',  '1', '-1', '-1',  '-2',  '-2', '-5']], // half towards 0
+    ['halfEven',  ['6', '2', '2',  '1',  '1', '-1', '-1',  '-2',  '-2', '-6']], // half to even
+    ['halfOdd',   ['5', '3', '2',  '1',  '1', '-1', '-1',  '-2',  '-3', '-5']], // half to odd
+]
+
+const testNumbers2 =
+                   [1.8, 1.5, 1.2, 0.8, 0.5, 0.2, -0.2, -0.5, -0.8, -1.2, -1.5, -1.8]
+const roundingModesExpected2: [RoundingMode, string[]][] = [
+    ['ceil',      ['2', '2', '2', '1', '1', '1',  '0',  '0',  '0', '-1', '-1', '-1']], // towards +
+    ['floor',     ['1', '1', '1', '0', '0', '0', '-1', '-1', '-1', '-2', '-2', '-2']], // towards -
+    ['expand',    ['2', '2', '2', '1', '1', '1', '-1', '-1', '-1', '-2', '-2', '-2']], // away from 0
+    ['trunc',     ['1', '1', '1', '0', '0', '0',  '0',  '0',  '0', '-1', '-1', '-1']], // towards 0
+    ['halfCeil',  ['2', '2', '1', '1', '1', '0',  '0',  '0', '-1', '-1', '-1', '-2']], // half to +
+    ['halfFloor', ['2', '1', '1', '1', '0', '0',  '0', '-1', '-1', '-1', '-2', '-2']], // half to -
+    ['halfExpand',['2', '2', '1', '1', '1', '0',  '0', '-1', '-1', '-1', '-2', '-2']], // half away from 0
+    ['halfTrunc', ['2', '1', '1', '1', '0', '0',  '0',  '0', '-1', '-1', '-1', '-2']], // half towards 0
+    ['halfEven',  ['2', '2', '1', '1', '0', '0',  '0',  '0', '-1', '-1', '-2', '-2']], // half to even
+    ['halfOdd',   ['2', '1', '1', '1', '1', '0',  '0', '-1', '-1', '-1', '-1', '-2']], // half to odd
+]
+
+test('rounding modes', (t) =>
+{
+    roundingModesExpected1.forEach(([roundingMode, expectedResults]) =>
+    {
+        testNumbers1.forEach((n, i) =>
+        {
+            t.equal(decimal.encode(n, {roundingMode, fractionDigits: 0}), expectedResults[i])
+        })
+    })
+    roundingModesExpected2.forEach(([roundingMode, expectedResults]) =>
+    {
+        testNumbers2.forEach((n, i) =>
+        {
+            t.equal(decimal.encode(n, {roundingMode, fractionDigits: 0}), expectedResults[i])
+        })
+    })
     t.end()
 })
