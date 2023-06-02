@@ -136,7 +136,7 @@ export default class Base<Digits extends string | number>
             precision: 32,
             fractionDigits: null,
             minimumFractionDigits: 0,
-            maximumFractionDigits: 8,
+            maximumFractionDigits: null,
             minimumIntegerDigits: 0,
             notation: 'standard',
             useGrouping: false,
@@ -301,7 +301,7 @@ export default class Base<Digits extends string | number>
                 {
                     if (opts.useGrouping
                         && (i % opts.groupingLength) == 0
-                        && (opts.useGrouping == "min2" || array.length > i+1))
+                        && (opts.useGrouping != "min2" || array.length > i+1))
                     {
                         acc.push(opts.groupingSeparator)
                     }
@@ -411,7 +411,6 @@ export default class Base<Digits extends string | number>
             
             if (!isRemainder && isRounded)
             {
-                console.log(value, this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
                 if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
                     isRemainder = true
             }
