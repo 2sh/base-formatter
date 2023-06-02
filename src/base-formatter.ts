@@ -198,25 +198,25 @@ export default class Base<Digits extends string | number>
         }
     }
 
-    static digitsByBase(base: number, options?: Options)
+    public static digitsByBase(base: number, options?: Options)
     {
         if (base > allDigits.length) throw "Can\'t be higher than " + allDigits.length + " digits"
         return new Base([...allDigits].slice(0, base).join(''), options)
     }
 
-    static binary(options?: Options) { return Base.digitsByBase(2, options) }
-    static octal(options?: Options) { return Base.digitsByBase(8, options) }
-    static decimal(options?: Options) { return Base.digitsByBase(10, options) }
-    static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
-    static dozenal(options?: Options)
+    public static binary(options?: Options) { return Base.digitsByBase(2, options) }
+    public static octal(options?: Options) { return Base.digitsByBase(8, options) }
+    public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
+    public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
+    public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
-    static dozenalInitials(options?: Options)
+    public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
-    static dozenalRoman(options?: Options)
+    public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
-    static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
-    static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) } // skipping over I
-    static base57(options?: Options)
+    public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
+    public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) } // skipping over I
+    public static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
             .replace('I', '')
@@ -226,7 +226,7 @@ export default class Base<Digits extends string | number>
             .replace('0', '')
         return new Base(digits, options)
     }
-    static base58(options?: Options)
+    public static base58(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
             .replace('I', '')
@@ -235,8 +235,8 @@ export default class Base<Digits extends string | number>
             .replace('0', '')
         return new Base(digits, options)
     }
-    static sexagesimal(options?: Options) { return Base.digitsByBase(60, options) }
-    static cuneiform(options?: Options)
+    public static sexagesimal(options?: Options) { return Base.digitsByBase(60, options) }
+    public static cuneiform(options?: Options)
     {
         const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
         const tens = ['',...'𒌋𒑱𒌍𒐏𒐐']
@@ -250,8 +250,8 @@ export default class Base<Digits extends string | number>
             ...options
         })
     }
-    static base62(options?: Options) { return Base.digitsByBase(62, options) }
-    static domino(options?: Options)
+    public static base62(options?: Options) { return Base.digitsByBase(62, options) }
+    public static domino(options?: Options)
     {
         const chars =
            '🁣🁤🁥🁦🁧🁨🁩🀱🀲🀳🀴🀵🀶🀷'
@@ -517,7 +517,7 @@ export default class Base<Digits extends string | number>
             integerLength, exponent)
     }
 
-    isNumber(value: string): boolean
+    public isNumber(value: string): boolean
     {
         if (this.reValid === null) throw 'No digits defined for isNumber check'
         return this.reValid.test(value)
