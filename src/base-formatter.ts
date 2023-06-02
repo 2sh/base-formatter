@@ -76,7 +76,7 @@ type NumeralOutput =
 {
     isNegative: boolean,
     integer: number[],
-    fractal: number[],
+    fraction: number[],
     exponent: number
 }
 
@@ -476,8 +476,8 @@ export default class Base<Digits extends string | number>
             return {
                 isNegative,
                 integer: roundedIntVal.map(v => v.toNumber()),
-                fractal: roundedFractVal.map(v => v.toNumber()),
-                exponent: exponent.toNumber()
+                fraction: roundedFractVal.map(v => v.toNumber()),
+                exponent: makeExponential ? exponent.toNumber() : 0
             }
         }
     }
@@ -486,7 +486,7 @@ export default class Base<Digits extends string | number>
     {
         const largestExponent = integerLength - 1
         return encodedNumber.reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
-            * Math.pow(this.base, -exponent) * (isNegative ? -1 : 1)
+            * Math.pow(this.base, exponent) * (isNegative ? -1 : 1)
     }
 
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
@@ -494,7 +494,7 @@ export default class Base<Digits extends string | number>
         if (typeof encodedValue !== "string")
         {
             return this.calculateValue(encodedValue.isNegative,
-                [...encodedValue.integer, ...encodedValue.fractal],
+                [...encodedValue.integer, ...encodedValue.fraction],
                 encodedValue.integer.length, encodedValue.exponent)
         }
 
@@ -514,7 +514,9 @@ export default class Base<Digits extends string | number>
             .replaceAll(opts.digitSeparator, '')
             .trim()
 
-        const integerLength = cleanedValue.indexOf(opts.radixCharacter) || cleanedValue.length
+        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter)
+
+        const integerLength = radixCharIndex >= 0 ? radixCharIndex : cleanedValue.length
 
         return this.calculateValue(isNegative,
             [...cleanedValue.replace(opts.radixCharacter, '')].map((d) => this.decodeDigit(d)),

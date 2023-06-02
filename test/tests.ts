@@ -68,6 +68,10 @@ test('formatting', (t) =>
 
 const dozenal = Base.dozenal()
 const domino = Base.domino()
+const base120Numerals = new Base(120)
+
+const complexInput = 346355345633
+const complexOutput = base120Numerals.encode(complexInput, {notation: 'scientific', maximumFractionDigits: 8})
 
 test('encoding', (t) =>
 {
@@ -79,7 +83,17 @@ test('encoding', (t) =>
     t.equal(dozenal.encode(51240.3333333333333333, {maximumFractionDigits: 8}), '257↊0;4')
     t.equal(dozenal.encode(51240.6666666666666666, {maximumFractionDigits: 8}), '257↊0;8')
     t.equal(domino.encode(51234.2345334554234, {maximumFractionDigits: 8}), '🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻')
+    t.deepEqual(base120Numerals.encode(-1440.5), {isNegative: true, integer: [12, 0], fraction: [60], exponent: 0})
+    t.deepEqual(complexOutput, {isNegative: false, integer: [ 13 ], fraction: [ 110, 37, 14, 66, 113 ], exponent: 5})
 
+    t.end()
+})
+
+test('decoding', (t) =>
+{
+    t.equal(Math.floor(base120Numerals.decode(complexOutput)), complexInput)
+    t.equal(dozenal.decode('100;6'), 144.5)
+    t.equal(dozenal.decode('84;4↊e6'), 299801088)
     t.end()
 })
 

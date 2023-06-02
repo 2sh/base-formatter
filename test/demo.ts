@@ -7,8 +7,8 @@ import Base from '../src/base-formatter'
 //const base = Base.decimal()
 //const base = Base.hexadecimal()
 //const base = Base.base62()
-//const base = Base.dozenal()
-const base = Base.duodecimal()
+const base = Base.dozenal()
+//const base = Base.duodecimal()
 //const base = Base.cuneiform()
 //const base = Base.domino()
 
