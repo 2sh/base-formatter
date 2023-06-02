@@ -70,7 +70,7 @@ type Properties =
     notation: Notation
     useGrouping: UseGrouping
 }
-type Options = Partial<Properties>
+export type Options = Partial<Properties>
 
 type NumeralOutput =
 {
@@ -132,7 +132,7 @@ export default class Base<Digits extends string | number>
 
             decimalDisplay: 'auto',
             signDisplay: 'auto',
-            roundingMode: 'halfTrunc',
+            roundingMode: 'halfExpand',
             precision: 32,
             fractionDigits: null,
             minimumFractionDigits: 0,
@@ -411,6 +411,7 @@ export default class Base<Digits extends string | number>
             
             if (!isRemainder && isRounded)
             {
+                console.log(value, this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
                 if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
                     isRemainder = true
             }
