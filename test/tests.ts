@@ -21,7 +21,7 @@ const formattingTests: FormattingTests = [
     [eVal, '1.602e-19', {notation: 'scientific', maximumFractionDigits: 3}],
     [eVal, '1.6022e-19', {notation: 'scientific', maximumFractionDigits: 4}],
     [eVal, '1.60218e-19', {notation: 'scientific', maximumFractionDigits: 5}],
-    [eVal, '1.602177e-19', {notation: 'scientific', maximumFractionDigits: 6}],
+    [eVal, '1.602177E-19', {notation: 'scientific', maximumFractionDigits: 6, scientificNotationCharacter: 'E'}],
     [testVal2, '0.12346', {maximumFractionDigits: 5}],
     [testVal2, '0.1235', {maximumFractionDigits: 4}],
     [testVal2, '0.124', {maximumFractionDigits: 3}],
@@ -30,8 +30,12 @@ const formattingTests: FormattingTests = [
     [testVal2, '0', {maximumFractionDigits: 0}],
     [testVal2, '1.', {maximumFractionDigits: 0, roundingMode: 'ceil', decimalDisplay: 'always'}],
     [testVal2, '0000.12345678900000', {minimumFractionDigits: 14, minimumIntegerDigits:4}],
+    [testVal2, '   0.123456789     ', {minimumFractionDigits: 14, minimumIntegerDigits:4,
+        integerPadCharacter: ' ', fractionPadCharacter: ' '}],
     [testVal3, '123,456,789', {useGrouping: true}],
     [testVal3, '123,456,789', {useGrouping: 'always'}],
+    [testVal3, '1234,56789', {useGrouping: true, groupingLength: 5}],
+    [123456.789, '123.456,789', {useGrouping: true, radixCharacter: ',', groupingSeparator: '.'}],
     [testVal3, '1.2346e8', {notation: 'scientific', maximumFractionDigits: 4}],
     [testVal3, '123.4568e6', {notation: 'engineering', maximumFractionDigits: 4}],
     [3456789, '3-4-5-6,7-8-9', {useGrouping: 'min2', digitSeparator: '-'}],
@@ -43,9 +47,9 @@ const formattingTests: FormattingTests = [
     [3, '3', {signDisplay: 'negative'}],
     [-0, '0', {signDisplay: 'negative'}],
     [-3, '-3', {signDisplay: 'negative'}],
-    [3, '+3', {signDisplay: 'exceptZero'}],
+    [3, 'P_3', {signDisplay: 'exceptZero', positiveSign: 'P_'}],
     [-0, '0', {signDisplay: 'exceptZero'}],
-    [-3, '-3', {signDisplay: 'exceptZero'}],
+    [-3, 'N_3', {signDisplay: 'exceptZero', negativeSign: 'N_'}],
 ]
 
 test('formatting', (t) =>
