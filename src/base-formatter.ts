@@ -150,7 +150,9 @@ export default class Base<Digits extends string | number>
         
         if (this.digits !== null)
         {
-            const u = (v: string): string => v ? '\\u' + v.charCodeAt(0).toString(16).padStart(4, '0') : ''
+            const u = (v: string): string => v
+                ? v.split('').map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('')
+                : ''
             const uDigits = this.digits.map(d => u(d)).join('')
             const signPattern = '['
                 + u(this.options.negativeSign)
@@ -174,7 +176,7 @@ export default class Base<Digits extends string | number>
                 + '[' + uDigits + ']+'
             + ')?'
             + '$'
-            this.reValid = new RegExp(pattern)
+            this.reValid = new RegExp(pattern, 'u')
         }
         else
             this.reValid = null
@@ -500,19 +502,20 @@ export default class Base<Digits extends string | number>
 
         const opts: Properties = {...this.options, ...options}
 
-        const isNegative = encodedValue.startsWith(opts.negativeSign)
+        const trimmedValue = encodedValue.trim()
 
-        const notationIndex = encodedValue.indexOf(opts.scientificNotationCharacter)
+        const isNegative = trimmedValue.startsWith(opts.negativeSign)
 
-        const exponent = notationIndex >= 0 ? this.decode(encodedValue.slice(notationIndex+1)) : 0
-        const intFractValue = notationIndex >= 0 ? encodedValue.slice(0,notationIndex) : encodedValue
+        const notationIndex = trimmedValue.indexOf(opts.scientificNotationCharacter)
+
+        const exponent = notationIndex >= 0 ? this.decode(trimmedValue.slice(notationIndex+1)) : 0
+        const intFractValue = notationIndex >= 0 ? trimmedValue.slice(0,notationIndex) : trimmedValue
 
         const cleanedValue = intFractValue
             .replaceAll(opts.positiveSign, '')
             .replaceAll(opts.negativeSign, '')
             .replaceAll(opts.groupingSeparator, '')
             .replaceAll(opts.digitSeparator, '')
-            .trim()
 
         const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter)
 

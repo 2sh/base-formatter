@@ -92,8 +92,17 @@ test('encoding', (t) =>
 test('decoding', (t) =>
 {
     t.equal(Math.floor(base120Numerals.decode(complexOutput)), complexInput)
-    t.equal(dozenal.decode('100;6'), 144.5)
+    t.equal(dozenal.decode('100;6  '), 144.5)
     t.equal(dozenal.decode('84;4↊e6'), 299801088)
+    t.end()
+})
+
+test('isNumber', (t) =>
+{
+    t.ok(dozenal.isNumber('100;6'))
+    t.ok(dozenal.isNumber('84;4↊e6'))
+    t.ok(dozenal.isNumber('00257↊0;55'))
+    t.ok(domino.isNumber('🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻'))
     t.end()
 })
 
