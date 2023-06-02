@@ -5,8 +5,6 @@ import test from 'tape'
 import Base from '../src/base-formatter'
 
 const decimal = Base.decimal()
-//const dozenal = Base.dozenal()
-//const domino = Base.domino()
 
 type FormattingTests = [number, string, Options][]
 const eVal = 1.6021766208e-19
@@ -50,5 +48,22 @@ test('formatting', (t) =>
         t.equal(decimal.encode(value, opts), expected)
     })
     
+    t.end()
+})
+
+const dozenal = Base.dozenal()
+const domino = Base.domino()
+
+test('encoding', (t) =>
+{
+    t.equal(dozenal.encode(51240), '257↊0')
+    t.equal(dozenal.encode(51240.45345, {maximumFractionDigits: 2}), '257↊0;55')
+    t.equal(dozenal.encode(144.5), '100;6')
+    t.equal(dozenal.encode(288.25), '200;3')
+    t.equal(dozenal.encode(143.75), '↋↋;9')
+    t.equal(dozenal.encode(51240.3333333333333333, {maximumFractionDigits: 8}), '257↊0;4')
+    t.equal(dozenal.encode(51240.6666666666666666, {maximumFractionDigits: 8}), '257↊0;8')
+    t.equal(domino.encode(51234.2345334554234, {maximumFractionDigits: 8}), '🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻')
+
     t.end()
 })
