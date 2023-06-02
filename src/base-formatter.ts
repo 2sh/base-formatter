@@ -478,14 +478,23 @@ export default class Base<Digits extends string | number>
         }
     }
 
-    decode(encodedValue: string | NumeralOutput, options?: Options): number
+    private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
-        const opts: Properties = {...this.options, ...options}
+        const largestExponent = integerLength - 1
+        return encodedNumber.reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
+            * Math.pow(this.base, -exponent) * (isNegative ? -1 : 1)
+    }
 
+    public decode(encodedValue: string | NumeralOutput, options?: Options): number
+    {
         if (typeof encodedValue !== "string")
         {
-            return 0
+            return this.calculateValue(encodedValue.isNegative,
+                [...encodedValue.integer, ...encodedValue.fractal],
+                encodedValue.integer.length, encodedValue.exponent)
         }
+
+        const opts: Properties = {...this.options, ...options}
 
         const isNegative = encodedValue.startsWith(opts.negativeSign)
 
@@ -501,16 +510,11 @@ export default class Base<Digits extends string | number>
             .replaceAll(opts.digitSeparator, '')
             .trim()
 
-        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter)
-        const largestExponent = (radixCharIndex >= 0 ? radixCharIndex : cleanedValue.length) - 1
+        const integerLength = cleanedValue.indexOf(opts.radixCharacter) || cleanedValue.length
 
-        let decodedValue = cleanedValue
-            .replace(opts.radixCharacter, '')
-            .split('')
-            .map((d) => this.decodeDigit(d))
-            .reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
-
-        return decodedValue * Math.pow(this.base, -exponent)
+        return this.calculateValue(isNegative,
+            [...cleanedValue.replace(opts.radixCharacter, '')].map((d) => this.decodeDigit(d)),
+            integerLength, exponent)
     }
 
     isNumber(value: string): boolean
