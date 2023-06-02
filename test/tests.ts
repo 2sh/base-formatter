@@ -97,12 +97,15 @@ test('decoding', (t) =>
     t.end()
 })
 
+const decimalWithSep = Base.decimal({digitSeparator: '-'})
+
 test('isNumber', (t) =>
 {
-    t.ok(dozenal.isNumber('100;6'))
-    t.ok(dozenal.isNumber('84;4↊e6'))
-    t.ok(dozenal.isNumber('00257↊0;55'))
+    t.ok(dozenal.isNumber('-100;6'))
+    t.ok(dozenal.isNumber('34,484;4↊e6'))
+    t.ok(dozenal.isNumber('+00257↊0;55'))
     t.ok(domino.isNumber('🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻'))
+    t.ok(decimalWithSep.isNumber('1-2,2-3-4'))
     t.end()
 })
 
