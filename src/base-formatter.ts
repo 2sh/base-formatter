@@ -456,7 +456,7 @@ export default class Base<Digits extends string | number>
                 || (opts.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
                 || (opts.signDisplay == "negative" && decVal.lessThan(0) && signSymbol)
                 || (opts.signDisplay == "never" && '')
-                || isNegative ? signSymbol : ''
+                || opts.signDisplay == "auto" && isNegative ? signSymbol : ''
             
             const encodedExponent = makeExponential && !exponent.equals(0)
                 ? (opts.scientificNotationCharacter + this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}))

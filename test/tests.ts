@@ -39,6 +39,13 @@ const formattingTests: FormattingTests = [
     [testVal4, '6,789', {useGrouping: 'always'}],
     [testVal4, '6789', {useGrouping: 'min2'}],
     [testVal4, '6-7-8-9', {useGrouping: 'min2', digitSeparator: '-'}],
+    [-0, '-0', {}],
+    [3, '3', {signDisplay: 'negative'}],
+    [-0, '0', {signDisplay: 'negative'}],
+    [-3, '-3', {signDisplay: 'negative'}],
+    [3, '+3', {signDisplay: 'exceptZero'}],
+    [-0, '0', {signDisplay: 'exceptZero'}],
+    [-3, '-3', {signDisplay: 'exceptZero'}],
 ]
 
 test('formatting', (t) =>
@@ -56,10 +63,10 @@ const domino = Base.domino()
 
 test('encoding', (t) =>
 {
-    t.equal(dozenal.encode(51240), '257↊0')
+    t.equal(dozenal.encode(51240, {decimalDisplay: 'always'}), '257↊0;')
     t.equal(dozenal.encode(51240.45345, {maximumFractionDigits: 2}), '257↊0;55')
     t.equal(dozenal.encode(144.5), '100;6')
-    t.equal(dozenal.encode(288.25), '200;3')
+    t.equal(dozenal.encode(288.25, {signDisplay: 'always'}), '+200;3')
     t.equal(dozenal.encode(143.75), '↋↋;9')
     t.equal(dozenal.encode(51240.3333333333333333, {maximumFractionDigits: 8}), '257↊0;4')
     t.equal(dozenal.encode(51240.6666666666666666, {maximumFractionDigits: 8}), '257↊0;8')
