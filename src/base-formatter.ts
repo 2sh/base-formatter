@@ -81,101 +81,101 @@ export type UseGrouping =
     | 'min2'
 
 /**
- * The properties of the base class
+ * The Options of the base class
  */
-interface Properties
+export type Options =
 {
     /**
      * The radix character, or "decimal" point/mark/separator, such as the point in 0.5)
      */
-    radixCharacter: string
+    radixCharacter?: string
     /**
      * The negative sign, such as a minus(-)
      */
-    negativeSign: string
+    negativeSign?: string
     /**
      * The positive sign, such as a plus(+)
      */
-    positiveSign: string
+    positiveSign?: string
     /**
      * The grouping separator, such as the commas in 100,000,000
      */
-    groupingSeparator: string
+    groupingSeparator?: string
     /**
      * The grouping length, the distance between grouping separators, e.g. with a length of 2: 1,00,00,00
      */
-    groupingLength: number
+    groupingLength?: number
     /**
      * The digit separator, if specified, will be places between every digit without a grouping separator
      */
-    digitSeparator: string
+    digitSeparator?: string
     /**
      * The scientific notation character, such as the e in 1.342e3
      */
-    scientificNotationCharacter: string
+    scientificNotationCharacter?: string
     /**
      * The integer pad character, padding the left side of the integer.
      * By default the specific character for zero,
      * but could also be a ' ' space char for example
      */
-    integerPadCharacter: string | null // the digit zero char if not string
+    integerPadCharacter?: string | null // the digit zero char if not string
     /**
      * The fraction pad character, padding the right side of the fraction.
      * By default the specific character for zero, but could also be a ' ' space char for example
      */
-    fractionPadCharacter: string | null
+    fractionPadCharacter?: string | null
 
 
     /**
      * When to display the radix character
      */
-    radixDisplay: RadixDisplay
+    radixDisplay?: RadixDisplay
     /**
      * When to display the sign
      */
-    signDisplay: SignDisplay
+    signDisplay?: SignDisplay
     /**
      * How numbers are to be rounded
      */
-    roundingMode: RoundingMode
+    roundingMode?: RoundingMode
     /**
      * The precision of the number, the number of significant digits.
      */
-    precision: number
+    precision?: number
     /**
      * If specified, the exact number of fraction Digits
      */
-    fractionDigits: number | null
+    fractionDigits?: number | null
     /**
      * The minimum number of fraction digits to use.
      * A value with a smaller number of fraction digits than this number will be
      * right-padded with zeros or the specified fraction pad character.
      */
-    minimumFractionDigits: number
+    minimumFractionDigits?: number
     /**
      * The maximum number of fraction digits to use.
      * If not specified, the maximum number of fraction digits is determined by the precision.
      */
-    maximumFractionDigits: number | null
+    maximumFractionDigits?: number | null
     /**
      * The minimum number of integer digits to use.
      * A value with a smaller number of integer digits than this number will be
      * left-padded with zeros or the specified integer pad character.
      */
-    minimumIntegerDigits: number
+    minimumIntegerDigits?: number
     /**
      * The formatting that should be displayed for the number.
      */
-    notation: Notation
+    notation?: Notation
     /**
      * When numbers are to be grouped.
      */
-    useGrouping: UseGrouping
+    useGrouping?: UseGrouping
 }
 /**
  * The options of the Base class, for adjusting the base settings or encoding formatting.
  */
-export type Options = Partial<Properties>
+type Properties = Required<Options>
 
 /**
  * The numeral output of the encode method if the base digits have not been specified.
@@ -213,13 +213,13 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The Base class which encodes and decodes from the chosen base.
+ * The base class which encodes and decodes from the chosen base.
  */
 export default class Base<Digits extends string | number>
 {
     public readonly digits: string[] | null
     public readonly base: number
-    public readonly options: Properties
+    private readonly options: Properties
     private readonly reValid: RegExp | null
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
