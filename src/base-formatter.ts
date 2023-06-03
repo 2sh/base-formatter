@@ -1,4 +1,4 @@
-/*
+/**
  * base-formatter
  * Copyright (C) 2023 2sh <contact@2sh.me>
  *
@@ -12,6 +12,30 @@ import Decimal from 'decimal.js'
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
+/**
+ * When to display the radix character for the number:
+ * - auto: Only show the radix character with the fraction.
+ * - always: Always show the radix character.
+ */
+export type RadixDisplay =
+      'auto'
+    | 'always'
+
+/**
+ * When to display the sign for the number:
+ * - auto: sign display for negative numbers only, including negative zero.
+ * - always: always display sign.
+ * - exceptZero: sign display for positive and negative numbers, but not zero.
+ * - negative: sign display for negative numbers only, excluding negative zero.
+ * - never: never display sign.
+ */
+export type SignDisplay =
+      'auto'
+    | 'always'
+    | 'exceptZero'
+    | 'negative'
+    | 'never'
+
 export type RoundingMode =
       'ceil'
     | 'floor'
@@ -24,17 +48,10 @@ export type RoundingMode =
     | 'halfEven'
     | 'halfOdd'
 
-export type SignDisplay =
-      'auto'
-    | 'always'
-    | 'exceptZero'
-    | 'negative'
-    | 'never'
-
-export type DecimalDisplay =
-      'auto' // if fraction
-    | 'always'
-
+/**
+ * The notation to display the number in:
+ * - standard: 
+ */
 export type Notation =
       'standard'
     | 'scientific'
@@ -46,20 +63,56 @@ export type UseGrouping =
     | 'always'
     | 'min2'
 
-type Properties =
+interface Properties
 {
+    /**
+     * The radix character, or "decimal" point/mark/separator, such as the point in 0.5)
+     */
     radixCharacter: string
+    /**
+     * The negative sign, such as a minus(-)
+     */
     negativeSign: string
+    /**
+     * The positive sign, such as a plus(+)
+     */
     positiveSign: string
+    /**
+     * The grouping separator, such as the commas in 100,000,000
+     */
     groupingSeparator: string
+    /**
+     * The grouping length, the distance between grouping separators, e.g. with a length of 2: 1,00,00,00
+     */
     groupingLength: number
+    /**
+     * The digit separator, if specified, will be places between every digit without a grouping separator
+     */
     digitSeparator: string
+    /**
+     * The scientific notation character, such as the e in 1.342e3
+     */
     scientificNotationCharacter: string
+    /**
+     * The integer pad character, padding the left side of the integer.
+     * By default the specific character for zero,
+     * but could also be a ' ' space char for example
+     */
     integerPadCharacter: string | null // the digit zero char if not string
+    /**
+     * The fraction pad character, padding the right side of the fraction.
+     * By default the specific character for zero, but could also be a ' ' space char for example
+     */
     fractionPadCharacter: string | null
 
     // formatting
-    decimalDisplay: DecimalDisplay
+    /**
+     * When to display the radix character
+     */
+    radixDisplay: RadixDisplay
+    /**
+     * When to display the sign
+     */
     signDisplay: SignDisplay
     roundingMode: RoundingMode
     precision: number
@@ -72,7 +125,7 @@ type Properties =
 }
 export type Options = Partial<Properties>
 
-type NumeralOutput =
+export type NumeralOutput =
 {
     isNegative: boolean,
     integer: number[],
@@ -92,7 +145,14 @@ const asciiUppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
-
+/**
+ * The Base class which encodes and decodes from the chosen base.
+ * 
+ * @param digits - A string of digits or a base number
+ *   If the digits argument is a string, the output of the encode method will be a formatted
+ *   string, and if a number, the output of the encode method will be an object
+ * @param options - Optional parameters
+ */
 export default class Base<Digits extends string | number>
 {
     public readonly digits: string[] | null
@@ -130,7 +190,7 @@ export default class Base<Digits extends string | number>
             integerPadCharacter: null,
             fractionPadCharacter: null,
 
-            decimalDisplay: 'auto',
+            radixDisplay: 'auto',
             signDisplay: 'auto',
             roundingMode: 'halfExpand',
             precision: 32,
@@ -470,7 +530,7 @@ export default class Base<Digits extends string | number>
             
             return outputSignSymbol
                 + encodedIntVal
-                + (encodedFractVal || opts.decimalDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
+                + (encodedFractVal || opts.radixDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
                 + encodedExponent
         }
         else

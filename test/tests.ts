@@ -28,7 +28,7 @@ const formattingTests: FormattingTests = [
     [testVal2, '0.12', {maximumFractionDigits: 2}],
     [testVal2, '+0.1', {maximumFractionDigits: 1, signDisplay: 'always'}],
     [testVal2, '0', {maximumFractionDigits: 0}],
-    [testVal2, '1.', {maximumFractionDigits: 0, roundingMode: 'ceil', decimalDisplay: 'always'}],
+    [testVal2, '1.', {maximumFractionDigits: 0, roundingMode: 'ceil', radixDisplay: 'always'}],
     [testVal2, '0000.12345678900000', {minimumFractionDigits: 14, minimumIntegerDigits:4}],
     [testVal2, '   0.123456789     ', {minimumFractionDigits: 14, minimumIntegerDigits:4,
         integerPadCharacter: ' ', fractionPadCharacter: ' '}],
@@ -75,7 +75,7 @@ const complexOutput = base120Numerals.encode(complexInput, {notation: 'scientifi
 
 test('encoding', (t) =>
 {
-    t.equal(dozenal.encode(51240, {decimalDisplay: 'always'}), '257↊0;')
+    t.equal(dozenal.encode(51240, {radixDisplay: 'always'}), '257↊0;')
     t.equal(dozenal.encode(51240.45345, {maximumFractionDigits: 2}), '257↊0;55')
     t.equal(dozenal.encode(144.5), '100;6')
     t.equal(dozenal.encode(288.25, {signDisplay: 'always'}), '+200;3')
