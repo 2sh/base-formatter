@@ -95,6 +95,7 @@ test('decoding', (t) =>
     t.equal(dozenal.decode('100;6  '), 144.5)
     t.equal(dozenal.decode('257↊0;6'), 51240.5)
     t.equal(domino.decode('🁨🁵🁕🁢🁆'), 51234.5)
+    t.equal(base120Numerals.decode({ isNegative: false, integer: [ 3 ], fraction: [ 80, 96, 24, 41, 57 ], exponent: 3 }), 6347544.345625)
     t.end()
 })
 
