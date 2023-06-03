@@ -886,7 +886,6 @@ export class Base<Digits extends string | number>
     private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
         const largestExponent = integerLength - 1
-        console.log(largestExponent)
         return encodedNumber.reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
             * Math.pow(this.base, exponent) * (isNegative ? -1 : 1)
     }
