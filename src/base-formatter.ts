@@ -39,12 +39,12 @@ export type SignDisplay =
  * - `'floor'`: Round towards negative infinity.
  * - `'expand'`: Round away from zero.
  * - `'trunc'`: Round towards zero.
- * - `'halfCeil'`: Values above or equal to the half-increment round like ceil, otherwise like floor.
- * - `'halfFloor'`: Values above the half-increment round like ceil, otherwise like floor.
- * - `'halfExpand'`: Values above or equal to the half-increment round like expand, otherwise like trunc.
- * - `'halfTrunc'`: Values above the half-increment round like expand, otherwise like trunc.
- * - `'halfEven'`: Like halfExpand, except that on the half-increment values round towards the nearest even digit.
- * - `'halfOdd'`: Like halfExpand, except that on the half-increment values round towards the nearest odd digit.
+ * - `'halfCeil'`: Values above or equal to the half-increment round like `ceil`, otherwise like `floor`.
+ * - `'halfFloor'`: Values above the half-increment round like `ceil`, otherwise like `floor`.
+ * - `'halfExpand'`: Values above or equal to the half-increment round like `expand`, otherwise like `trunc`.
+ * - `'halfTrunc'`: Values above the half-increment round like `expand`, otherwise like `trunc`.
+ * - `'halfEven'`: Like `halfExpand`, except that on the half-increment values round towards the nearest even digit.
+ * - `'halfOdd'`: Like `halfExpand`, except that on the half-increment values round towards the nearest odd digit.
  */
 export type RoundingMode =
       'ceil'
@@ -72,21 +72,14 @@ export type Notation =
  * - `'always'`: Always display the group separators.
  * - `'min2'`: Display grouping separators when there are at least 2 digits in a group.
  * - `false`: Do not display grouping separators.
- * - `true`: alias for 'always'.
+ * - `true`: alias for `'always'`.
  */
 export type UseGrouping =
       false
     | true
     | 'always'
     | 'min2'
-/*
-    fractionDigits: null,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: null,
-    minimumIntegerDigits: 0,
-    notation: 'standard',
-    useGrouping: false,
-*/
+
 /**
  * The Options of the base class.
  */
