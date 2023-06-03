@@ -607,6 +607,7 @@ export default class Base<Digits extends string | number>
      * @param value - The value of which to calculate the exponent.
      * @param isEngineering - Whether to use the engineering notation.
      * @returns The exponent.
+     * @category Instance
      */
     private calculateExponent(value: Decimal | number, isEngineering = false): number
     {
@@ -624,6 +625,7 @@ export default class Base<Digits extends string | number>
     /**
      * @param value - The integer value to convert to the base.
      * @returns A number array of the value in the instance base.
+     * @category Instance
      */
     private convertIntegerToBase(value: Decimal): Decimal[]
     {
@@ -644,6 +646,7 @@ export default class Base<Digits extends string | number>
      * @param value - The number array to encode.
      * @param opts - The options used.
      * @returns The encoded value.
+     * @category Instance
      */
     private encodeInteger(value: (Decimal | string)[], opts: Properties): string
     {
@@ -676,6 +679,7 @@ export default class Base<Digits extends string | number>
      * @param value - The fraction value to convert to the base.
      * @param precision - The fraction precision, the maximum length of the fraction.
      * @returns A number array of the value in the instance base.
+     * @category Instance
      */
     private convertFractionalToBase(value: Decimal, precision: Decimal): Decimal[]
     {
@@ -699,6 +703,7 @@ export default class Base<Digits extends string | number>
      * Thrown when the digits are undefined.
      * @throws {@link DigitNotFound}
      * Thrown when no digit could be found for the specified number.
+     * @category Instance
      */
     private encodeDigit(value: number): string
     {
@@ -715,6 +720,7 @@ export default class Base<Digits extends string | number>
      * Thrown when the digits are undefined.
      * @throws {@link DigitNotFound}
      * Thrown when the string is not found in the digits.
+     * @category Instance
      */
     private decodeDigit(value: string): number
     {
@@ -875,6 +881,7 @@ export default class Base<Digits extends string | number>
      * @param integerLength - How much of the encoded number is the integer partm.
      * @param exponent - The exponent of the number.
      * @returns The decoded value.
+     * @category Instance
      */
     private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
@@ -887,11 +894,11 @@ export default class Base<Digits extends string | number>
      * @param encodedValue - An encoded number in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
      * @returns The decoded number.
-     * @category Instance
      * @throws {@link DigitsUndefined}
      * Thrown when the digits are undefined.
      * @throws {@link DigitNotFound}
      * Thrown when the specified string contains unknown characters.
+     * @category Instance
      */
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
@@ -931,9 +938,9 @@ export default class Base<Digits extends string | number>
     /**
      * @param value - A string to check.
      * @returns Whether the input string is a number according to the digits and options of the instance.
-     * @category Instance
      * @throws {@link DigitsUndefined}
      * Thrown when the digits are undefined.
+     * @category Instance
      */
     public isNumber(value: string): boolean
     {
