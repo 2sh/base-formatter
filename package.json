@@ -35,7 +35,8 @@
     "build": "tsc --listEmittedFiles",
     "demo": "ts-node test/demo.ts",
     "test": "ts-node test/tests.ts",
-    "lint": "eslint src test"
+    "lint": "eslint src test",
+    "docs": "typedoc"
   },
   "dependencies": {
     "decimal.js": "^10.4.3",
