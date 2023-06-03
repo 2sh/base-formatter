@@ -196,7 +196,7 @@ export type Options =
 type Properties = Required<Options>
 
 /**
- * The numeral output of the encode method if the base digits have not been specified.
+ * The numeral output of the {@link Base.encode} method if the base digits have not been specified.
  */
 export type NumeralOutput =
 {
@@ -231,7 +231,7 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The base class which encodes to and decodes from the chosen base.
+ * The class which encodes to and decodes from the chosen base.
  */
 export default class Base<Digits extends string | number>
 {
@@ -253,9 +253,10 @@ export default class Base<Digits extends string | number>
     private readonly baseZero: string
 
     /**
+     * The constructor of the base class.
      * @param digits - A string of digits or a base number
-     *   If the digits argument is a string, the output of the encode method will be a formatted
-     *   string, and if a number, the output of the encode method will be an object.
+     *   If the digits argument is a string, the output of the {@link encode} method will be a formatted
+     *   string, and if a number, the output of the {@link encode} method will be a {@link NumeralOutput} object.
      * @param options - Optional parameters, for adjusting the base settings or encoding formatting.
      */
     constructor(digits: Digits, options?: Options)
@@ -411,7 +412,7 @@ export default class Base<Digits extends string | number>
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     /**
      * This method returns an instance of the base class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
-     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the `dozenal` method in case a font doesn't have them.
+     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link Base.dozenal} method in case a font doesn't have them.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
@@ -609,7 +610,7 @@ export default class Base<Digits extends string | number>
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
      * @returns The encoded number as a string if digits were passed to the instance,
-     *   otherwise a numeral output object.
+     *   otherwise a {@link NumeralOutput} object.
      */
     public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
     public encode(numberValue: number | string | Decimal, options?: Options): NumeralOutput | string
