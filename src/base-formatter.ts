@@ -411,7 +411,7 @@ export default class Base<Digits extends string | number>
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     /**
      * This method returns an instance of the base class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
-     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the dozenal() method in case a font doesn't have them.
+     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the `dozenal` method in case a font doesn't have them.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
