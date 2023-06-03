@@ -81,112 +81,115 @@ export type UseGrouping =
     | 'min2'
 
 /**
- * The Options of the base class.
+ * The options passed to {@link Base}, {@link Base.encode} and {@link Base.decode}.
  */
-export type Options =
+export interface Options
 {
     /**
      * The radix character, or "decimal" point/mark/separator, such as the point in `0.5`).
-     * The defaults is `'.'`.
+     * @defaultValue `'.'`
      */
     radixCharacter?: string
     /**
      * The negative sign.
-     * The default is `'-'`.
+     * @defaultValue `'-'`
      */
     negativeSign?: string
     /**
      * The positive sign.
-     * The default is `'+'`.
+     * @defaultValue `'+'`
      */
     positiveSign?: string
     /**
      * The grouping separator, such as the commas in `100,000,000`.
-     * The default is `','`.
+     * @defaultValue `','`
      */
     groupingSeparator?: string
     /**
      * The grouping length, the distance between grouping separators, e.g. with a length of 2: `1,00,00,00`.
-     * The default is `3`.
+     * @defaultValue `3`
      */
     groupingLength?: number
     /**
      * The digit separator, if specified, will be places between every digit without a grouping separator.
-     * The default is an empty string: `''`.
+     * @defaultValue `''`
      */
     digitSeparator?: string
     /**
      * The scientific notation character, such as the e in `1.342e3`.
-     * The default is `'e'`.
+     * @defaultValue `'e'`
      */
     scientificNotationCharacter?: string
     /**
      * The integer pad character, padding the left side of the integer.
-     * By default (`null`) the specified digit for zero is used,
+     * By default the specified digit for zero is used,
      * but could also be a `' '` space char for example.
+     * @defaultValue `null`
      */
     integerPadCharacter?: string | null // the digit zero char if not string
     /**
      * The fraction pad character, padding the right side of the fraction.
-     * By default (`null`) the specified digit for zero is used, but could also be a `' '` space char for example.
+     * By default the specified digit for zero is used, but could also be a `' '` space char for example.
+     * @defaultValue `null`
      */
     fractionPadCharacter?: string | null
 
 
     /**
      * When to display the radix character.
-     * The default is `'auto'`.
+     * @defaultValue `'auto'`
      */
     radixDisplay?: RadixDisplay
     /**
      * When to display the sign.
-     * The default is `'auto'`.
+     * @defaultValue `'auto'`
      */
     signDisplay?: SignDisplay
     /**
      * How numbers are to be rounded.
-     * The default is `'halfExpand'`.
+     * @defaultValue `'halfExpand'`
      */
     roundingMode?: RoundingMode
     /**
      * The precision of the number, the number of significant digits.
-     * The default is `32`.
+     * @defaultValue `32`
      */
     precision?: number
     /**
      * If specified, the exact number of fraction Digits.
-     * The default is `null`, meaning no limit, though
-     * overridable by minimumFractionDigits and maximumFractionDigits.
+     * By default there is not limit, though this is
+     * overridable by {@link minimumFractionDigits} and {@link maximumFractionDigits}.
+     * @defaultValue `null`
      */
     fractionDigits?: number | null
     /**
      * The minimum number of fraction digits to use.
      * A value with a smaller number of fraction digits than this number will be
      * right-padded with zeros or the specified fraction pad character.
-     * The default is `0`.
+     * @defaultValue `0`
      */
     minimumFractionDigits?: number
     /**
      * The maximum number of fraction digits to use.
-     * If not specified, the maximum number of fraction digits is determined by the precision.
-     * The default is `null`, meaning no maximum number.
+     * By default, the maximum number of fraction digits is determined by the precision.
+     * @defaultValue `null`
      */
     maximumFractionDigits?: number | null
     /**
      * The minimum number of integer digits to use.
      * A value with a smaller number of integer digits than this number will be
      * left-padded with zeros or the specified integer pad character.
-     * The default is `0`.
+     * @defaultValue `0`
      */
     minimumIntegerDigits?: number
     /**
      * The formatting that should be displayed for the number.
-     * The default is `'standard'`.
+     * @defaultValue `'standard'`
      */
     notation?: Notation
     /**
      * When numbers are to be grouped.
-     * The default is `false`.
+     * @defaultValue `false`
      */
     useGrouping?: UseGrouping
 }
@@ -198,7 +201,7 @@ type Properties = Required<Options>
 /**
  * The numeral output of the {@link Base.encode} method if the base digits have not been specified.
  */
-export type NumeralOutput =
+export interface NumeralOutput
 {
     /**
      * Whether the number is negative.
