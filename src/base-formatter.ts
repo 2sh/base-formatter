@@ -1,16 +1,40 @@
 /*
- * base-formatter
- * Copyright (C) 2023 2sh <contact@2sh.me>
- *
+ * Copyright (c) 2023 2sh <contact@2sh.me>
+ * 
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/**
+ * A Javascript library for encoding numbers to different radixes/bases with many formatting options.
+ * 
+ * The `base-formatter` defines the {@link default} class, which is used to
+ * create a base instance for encoding and decoding numbers.
+ * 
+ * @packageDocumentation
  */
 
 import Decimal from 'decimal.js'
 
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+
+/**
+ * Thrown if the base number exceeds the maximum.
+ * @category Error
+ **/
+export class MaximumBaseExceeded extends Error {}
+/**
+ * Thrown if there are no digits specified for the instance when required by a method.
+ * @category Error
+ **/
+export class DigitsUndefined extends Error {}
+/**
+ * Thrown if the matching digit is not found.
+ * @category Error
+ */
+export class DigitNotFound extends Error {}
 
 /**
  * - `'auto'`: Only show the radix character with the fraction.
@@ -21,11 +45,11 @@ export type RadixDisplay =
     | 'always'
 
 /**
- * - `'auto'`: sign display for negative numbers only, including negative zero.
- * - `'always'`: always display sign.
- * - `'exceptZero'`: sign display for positive and negative numbers, but not zero.
- * - `'negative'`: sign display for negative numbers only, excluding negative zero.
- * - `'never'`: never display sign.
+ * - `'auto'`: Sign display for negative numbers only, including negative zero.
+ * - `'always'`: Always display sign.
+ * - `'exceptZero'`: Sign display for positive and negative numbers, but not zero.
+ * - `'negative'`: Sign display for negative numbers only, excluding negative zero.
+ * - `'never'`: Never display sign.
  */
 export type SignDisplay =
       'auto'
@@ -72,7 +96,7 @@ export type Notation =
  * - `'always'`: Always display the group separators.
  * - `'min2'`: Display grouping separators when there are at least 2 digits in a group.
  * - `false`: Do not display grouping separators.
- * - `true`: alias for `'always'`.
+ * - `true`: Alias for `'always'`.
  */
 export type UseGrouping =
       false
@@ -194,7 +218,7 @@ export interface Options
     useGrouping?: UseGrouping
 }
 /**
- * The options of the Base class, for adjusting the base settings or encoding formatting.
+ * The properties of the Base class.
  */
 type Properties = Required<Options>
 
@@ -221,9 +245,15 @@ export interface NumeralOutput
     exponent: number
 }
 
-function createPadArray(amount: Decimal, character: string): string[]
+/**
+ * Create a pad array
+ * @param amount - The length of the array
+ * @param character - The character to fill the array with
+ * @returns The pad array
+ */
+function createPadArray(length: Decimal, character: string): string[]
 {
-    return Array(amount.toNumber()).fill(character) as string[]
+    return Array(length.toNumber()).fill(character) as string[]
 }
 
 const zero = new Decimal(0)
@@ -234,7 +264,10 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The class which encodes to and decodes from the chosen base.
+ * The class from which to create a base instance for encoding and decoding numbers.
+ * @typeParam Digits - The type of the `digits` argument,
+ * determining the output type of the {@link Base.encode} method.
+ * @category Main
  */
 export default class Base<Digits extends string | number>
 {
@@ -246,20 +279,38 @@ export default class Base<Digits extends string | number>
      * The digits to use.
      */
     public readonly digits: string[] | null
-    private readonly options: Properties
+    /**
+     * The properties of the Base class, set by the options of the constructor
+     */
+    private readonly properties: Properties
+    /**
+     * The RegExp object used by the {@link isNumber} method.
+     */
     private readonly reValid: RegExp | null
+    /**
+     * The rounding modes used by the {@link encode} method.
+     */
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
     }
+    /**
+     * The natural logarithm of the base used by the {@link calculateExponent} method.
+     */
     private readonly lnBase: Decimal
+    /**
+     * The natural logarithm of base*10^3 used by the {@link calculateExponent} method.
+     */
     private readonly lnBase3: Decimal
+    /**
+     * The zero character of the input digits. Becomes a `' '` space character if no digits are specified.
+     */
     private readonly baseZero: string
 
     /**
      * The constructor of the base class.
-     * @param digits - A string of digits or a base number
-     *   If the digits argument is a string, the output of the {@link encode} method will be a formatted
-     *   string, and if a number, the output of the {@link encode} method will be a {@link NumeralOutput} object.
+     * @param digits - A string of digits, the length of which determining the base number, or a base number.
+     * If the digits argument is a string, the output of the {@link encode} method will be a formatted
+     * string, and if a number, the output of the {@link encode} method will be a {@link NumeralOutput} object.
      * @param options - Optional parameters, for adjusting the base settings or encoding formatting.
      */
     constructor(digits: Digits, options?: Options)
@@ -275,7 +326,7 @@ export default class Base<Digits extends string | number>
             this.base = this.digits.length
         }
 
-        this.options = {
+        this.properties = {
             radixCharacter: '.',
             negativeSign: '-',
             positiveSign: '+',
@@ -311,23 +362,23 @@ export default class Base<Digits extends string | number>
                 : ''
             const uDigits = this.digits.map(d => u(d)).join('')
             const signPattern = '['
-                + u(this.options.negativeSign)
-                + u(this.options.positiveSign)
+                + u(this.properties.negativeSign)
+                + u(this.properties.positiveSign)
             + ']?'
             
             const pattern = '^'
             + signPattern
             + '['
                 + uDigits
-                + u(this.options.digitSeparator)
-                + u(this.options.groupingSeparator)
+                + u(this.properties.digitSeparator)
+                + u(this.properties.groupingSeparator)
             + ']+'
             + '(?:'
-                + u(this.options.radixCharacter)
+                + u(this.properties.radixCharacter)
                 + '[' + uDigits + ']*'
             + ')?'
             + '(?:'
-                + u(this.options.scientificNotationCharacter)
+                + u(this.properties.scientificNotationCharacter)
                 + signPattern
                 + '[' + uDigits + ']+'
             + ')?'
@@ -371,13 +422,18 @@ export default class Base<Digits extends string | number>
     /**
      * This method will take the base number, slice a string of digits 0-9A-Za-z and return
      * an instance of the base class with the sliced string as its digits.
-     * @param base - The base number to use. For this method, a maximum of `62`.
+     * @param base - The base number to use, a maximum of `62`.
+     * For a higher base number, supply the base class an amount of digits equal to the desired base or
+     * specify it with just a number and receive the output as a {@link NumeralObject}.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @throws {@link MaximumBaseExceeded}
+     * Thrown when the base number exceeds the maximum amount of this method.
+     * @category Static
      */
     public static digitsByBase(base: number, options?: Options)
     {
-        if (base > allDigits.length) throw "Can't be higher than " + allDigits.length.toString() + " digits"
+        if (base > allDigits.length) throw new MaximumBaseExceeded("Can't be higher than " + allDigits.length.toString() + " digits")
         return new Base([...allDigits].slice(0, base).join(''), options)
     }
 
@@ -385,24 +441,28 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 2 with the digits `'01'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static binary(options?: Options) { return Base.digitsByBase(2, options) }
     /**
      * This method returns an instance of the base class in base 8 with the digits `'01234567'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static octal(options?: Options) { return Base.digitsByBase(8, options) }
     /**
      * This method returns an instance of the base class in base 10 with the digits `'0123456789'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
     /**
      * This method returns an instance of the base class in base 16 with the digits `'0123456789ABCDEF'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
     /**
@@ -410,6 +470,7 @@ export default class Base<Digits extends string | number>
      * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
@@ -418,6 +479,7 @@ export default class Base<Digits extends string | number>
      * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link Base.dozenal} method in case a font doesn't have them.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
@@ -426,6 +488,7 @@ export default class Base<Digits extends string | number>
      * Uses a variant of the digit for 10 using the Roman numeral X.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
@@ -433,6 +496,7 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 12 with the digits `'0123456789AB'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
     /**
@@ -440,12 +504,14 @@ export default class Base<Digits extends string | number>
      * skipping over I in order to avoid confusion between I and 1.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
     /**
      * This method returns an instance of the base class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static base57(options?: Options)
     {
@@ -461,6 +527,7 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static base58(options?: Options)
     {
@@ -475,6 +542,7 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 60 with the digits 0-9A-Ba-b without the characters l0.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static sexagesimal(options?: Options)
     {
@@ -487,6 +555,7 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 60 using cuneiform digits.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static cuneiform(options?: Options)
     {
@@ -506,12 +575,14 @@ export default class Base<Digits extends string | number>
      * This method returns an instance of the base class in base 62 with the digits 0-9A-Ba-b.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static base62(options?: Options) { return Base.digitsByBase(62, options) }
     /**
      * This method returns an instance of the base class in base 98 using Unicode domino tiles.
      * @param options - The options to use.
      * @returns An instance of the base class.
+     * @category Static
      */
     public static domino(options?: Options)
     {
@@ -531,13 +602,29 @@ export default class Base<Digits extends string | number>
         })
     }
 
-
-    private calculateExponent(value: Decimal, isEngineering = false): Decimal
+    /**
+     * Calculate the exponent of a given value in the instance base.
+     * @param value - The value of which to calculate the exponent.
+     * @param isEngineering - Whether to use the engineering notation.
+     * @returns The exponent.
+     */
+    private calculateExponent(value: Decimal | number, isEngineering = false): number
     {
-        if (value.equals(0)) return value
-        return value.ln().dividedBy(isEngineering ? this.lnBase3 :this.lnBase).floor().times(isEngineering ? 3 : 1)
+        const isNumber = typeof value === 'number'
+        const decValue = isNumber ? new Decimal(value) : value
+        if (decValue.equals(0)) return decValue.toNumber()
+        return decValue
+            .ln()
+            .dividedBy(isEngineering ? this.lnBase3 :this.lnBase)
+            .floor()
+            .times(isEngineering ? 3 : 1)
+            .toNumber()
     }
 
+    /**
+     * @param value - The integer value to convert to the base.
+     * @returns A number array of the value in the instance base.
+     */
     private convertIntegerToBase(value: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
@@ -552,10 +639,16 @@ export default class Base<Digits extends string | number>
         return baseVal.reverse()
     }
 
+    /**
+     * Encode the value array using the instance digits.
+     * @param value - The number array to encode.
+     * @param opts - The options used.
+     * @returns The encoded value.
+     */
     private encodeInteger(value: (Decimal | string)[], opts: Properties): string
     {
         return value
-            .map(n => this.encodeDigit(n))
+            .map(n => typeof n === 'string' ? n : this.encodeDigit(n.toNumber()))
             .reverse()
             .reduce((acc, cur, i, array) =>
             {
@@ -579,6 +672,11 @@ export default class Base<Digits extends string | number>
             .join('')
     }
 
+    /**
+     * @param value - The fraction value to convert to the base.
+     * @param precision - The fraction precision, the maximum length of the fraction.
+     * @returns A number array of the value in the instance base.
+     */
     private convertFractionalToBase(value: Decimal, precision: Decimal): Decimal[]
     {
         const baseVal: Decimal[] = []
@@ -593,18 +691,36 @@ export default class Base<Digits extends string | number>
         return baseVal
     }
 
-    private encodeDigit(value: Decimal | string): string
+    /**
+     * Encode a single digit.
+     * @param value - The number to convert.
+     * @returns The encoded digit.
+     * @throws {@link DigitsUndefined}
+     * Thrown when the digits are undefined.
+     * @throws {@link DigitNotFound}
+     * Thrown when no digit could be found for the specified number.
+     */
+    private encodeDigit(value: number): string
     {
-        if (this.digits === null) throw 'No digits'
-        if (typeof value === 'string') return value
-        return this.digits[value.toNumber()]
+        if (this.digits === null) throw new DigitsUndefined('Could not encode as digits undefined')
+        if (!this.digits[value]) throw new DigitNotFound('No digit found for number specified')
+        return this.digits[value]
     }
 
+    /**
+     * Decode a single digit.
+     * @param value - The digit to convert to a number.
+     * @returns The decoded digit.
+     * @throws {@link DigitsUndefined}
+     * Thrown when the digits are undefined.
+     * @throws {@link DigitNotFound}
+     * Thrown when the string is not found in the digits.
+     */
     private decodeDigit(value: string): number
     {
-        if (this.digits === null) throw 'No digits'
+        if (this.digits === null) throw new DigitsUndefined('Could not decode as digits undefined')
         const digitIndex = this.digits.indexOf(value)
-        if (!(digitIndex >= 0)) throw 'Invalid digit'
+        if (!(digitIndex >= 0)) throw new DigitNotFound('String value not found in digits')
         return digitIndex
     }
 
@@ -614,41 +730,42 @@ export default class Base<Digits extends string | number>
      * @param options - The options to use for formatting.
      * @returns The encoded number as a string if digits were passed to the instance,
      *   otherwise a {@link NumeralOutput} object.
+     * @category Instance
      */
     public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
     public encode(numberValue: number | string | Decimal, options?: Options): NumeralOutput | string
     {
-        const opts: Properties = {...this.options, ...options}
-        if (typeof opts.integerPadCharacter !== "string")
-            opts.integerPadCharacter = this.baseZero
-        if (typeof opts.fractionPadCharacter !== "string")
-            opts.fractionPadCharacter = this.baseZero
-        if (opts.fractionDigits !== null)
+        const props: Properties = {...this.properties, ...options}
+        if (typeof props.integerPadCharacter !== "string")
+            props.integerPadCharacter = this.baseZero
+        if (typeof props.fractionPadCharacter !== "string")
+            props.fractionPadCharacter = this.baseZero
+        if (props.fractionDigits !== null)
         {
-            opts.maximumFractionDigits = opts.fractionDigits
-            opts.minimumFractionDigits = opts.fractionDigits
+            props.maximumFractionDigits = props.fractionDigits
+            props.minimumFractionDigits = props.fractionDigits
         }
-        opts.minimumFractionDigits = opts.maximumFractionDigits
-            ? Math.min(opts.minimumFractionDigits, opts.maximumFractionDigits)
-            : opts.minimumFractionDigits
+        props.minimumFractionDigits = props.maximumFractionDigits
+            ? Math.min(props.minimumFractionDigits, props.maximumFractionDigits)
+            : props.minimumFractionDigits
         
         const decVal = new Decimal(numberValue)
         let isNegative = decVal.isNegative()
         const absVal = decVal.absoluteValue()
         
-        const exponent = this.calculateExponent(absVal, opts.notation === 'engineering')
+        const exponent = this.calculateExponent(absVal, props.notation === 'engineering')
         
-        const makeExponential = opts.notation !== 'standard' && !exponent.equals(0)
+        const makeExponential = props.notation !== 'standard' && exponent != 0
         const expValue = makeExponential ? (absVal.dividedBy(Decimal.pow(this.base, exponent))) : absVal
 
-        const precisionExponent = makeExponential ? exponent : zero
+        const precisionExponent = makeExponential ? exponent : 0
 
-        const decPrecision = new Decimal(opts.precision)
-        const maxFractLengthByPrecision = (precisionExponent.greaterThan(0)
+        const decPrecision = new Decimal(props.precision)
+        const maxFractLengthByPrecision = (precisionExponent > 0
             ? decPrecision.minus(precisionExponent)
             : decPrecision) || zero
-        const maxFractionalLength = (typeof opts.maximumFractionDigits == "number"
-            ? Decimal.min(opts.maximumFractionDigits, maxFractLengthByPrecision)
+        const maxFractionalLength = (typeof props.maximumFractionDigits == "number"
+            ? Decimal.min(props.maximumFractionDigits, maxFractLengthByPrecision)
             : maxFractLengthByPrecision)
 
         const intVal = expValue.floor()
@@ -680,7 +797,7 @@ export default class Base<Digits extends string | number>
             
             if (!isRemainder && isRounded)
             {
-                if (this.roundingModes[opts.roundingMode](value, isNegative, i, baseVal))
+                if (this.roundingModes[props.roundingMode](value, isNegative, i, baseVal))
                     isRemainder = true
             }
 
@@ -712,32 +829,32 @@ export default class Base<Digits extends string | number>
         if (this.digits !== null)
         {
             const encodedIntVal = this.encodeInteger(
-                (opts.minimumIntegerDigits && opts.minimumIntegerDigits > roundedIntVal.length
-                ? [...createPadArray((new Decimal(opts.minimumIntegerDigits)).minus(roundedIntVal.length), opts.integerPadCharacter), ...roundedIntVal]
-                : roundedIntVal), opts)
+                (props.minimumIntegerDigits && props.minimumIntegerDigits > roundedIntVal.length
+                ? [...createPadArray((new Decimal(props.minimumIntegerDigits)).minus(roundedIntVal.length), props.integerPadCharacter), ...roundedIntVal]
+                : roundedIntVal), props)
             
             const encodedFractVal =
-                (opts.minimumFractionDigits > roundedFractVal.length
-                    ? [...roundedFractVal, ...createPadArray(new Decimal(opts.minimumFractionDigits-roundedFractVal.length), opts.fractionPadCharacter)]
+                (props.minimumFractionDigits > roundedFractVal.length
+                    ? [...roundedFractVal, ...createPadArray(new Decimal(props.minimumFractionDigits-roundedFractVal.length), props.fractionPadCharacter)]
                     : roundedFractVal)
-                .map(n => this.encodeDigit(n))
+                .map(n => typeof n === 'string' ? n : this.encodeDigit(n.toNumber()))
                 .join('')
             
-            const signSymbol = isNegative ? opts.negativeSign : opts.positiveSign
+            const signSymbol = isNegative ? props.negativeSign : props.positiveSign
             const outputSignSymbol = 
-                (opts.signDisplay == "always" && signSymbol)
-                || (opts.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
-                || (opts.signDisplay == "negative" && decVal.lessThan(0) && signSymbol)
-                || (opts.signDisplay == "never" && '')
-                || opts.signDisplay == "auto" && isNegative ? signSymbol : ''
+                (props.signDisplay == "always" && signSymbol)
+                || (props.signDisplay == "exceptZero" && !decVal.isZero() && signSymbol)
+                || (props.signDisplay == "negative" && decVal.lessThan(0) && signSymbol)
+                || (props.signDisplay == "never" && '')
+                || props.signDisplay == "auto" && isNegative ? signSymbol : ''
             
-            const encodedExponent = makeExponential && !exponent.equals(0)
-                ? (opts.scientificNotationCharacter + (this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}) as string))
+            const encodedExponent = makeExponential && exponent != 0
+                ? (props.scientificNotationCharacter + (this.encode(exponent, {...this.properties, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}) as string))
                 : ''
             
             return outputSignSymbol
                 + encodedIntVal
-                + (encodedFractVal || opts.radixDisplay === 'always' ? (opts.radixCharacter + encodedFractVal) : '')
+                + (encodedFractVal || props.radixDisplay === 'always' ? (props.radixCharacter + encodedFractVal) : '')
                 + encodedExponent
         }
         else
@@ -746,11 +863,19 @@ export default class Base<Digits extends string | number>
                 isNegative,
                 integer: roundedIntVal.map(v => v.toNumber()),
                 fraction: roundedFractVal.map(v => v.toNumber()),
-                exponent: makeExponential ? exponent.toNumber() : 0
+                exponent: makeExponential ? exponent : 0
             }
         }
     }
 
+    /**
+     * Calculating the parts of the encoded value together.
+     * @param isNegative - Whether the number is negative.
+     * @param encodedNumber - The encoded number.
+     * @param integerLength - How much of the encoded number is the integer partm.
+     * @param exponent - The exponent of the number.
+     * @returns The decoded value.
+     */
     private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
         const largestExponent = integerLength - 1
@@ -762,6 +887,11 @@ export default class Base<Digits extends string | number>
      * @param encodedValue - An encoded number in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
      * @returns The decoded number.
+     * @category Instance
+     * @throws {@link DigitsUndefined}
+     * Thrown when the digits are undefined.
+     * @throws {@link DigitNotFound}
+     * Thrown when the specified string contains unknown characters.
      */
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
@@ -772,7 +902,7 @@ export default class Base<Digits extends string | number>
                 encodedValue.integer.length, encodedValue.exponent)
         }
 
-        const opts: Properties = {...this.options, ...options}
+        const opts: Properties = {...this.properties, ...options}
 
         const trimmedValue = encodedValue.trim()
 
@@ -801,10 +931,13 @@ export default class Base<Digits extends string | number>
     /**
      * @param value - A string to check.
      * @returns Whether the input string is a number according to the digits and options of the instance.
+     * @category Instance
+     * @throws {@link DigitsUndefined}
+     * Thrown when the digits are undefined.
      */
     public isNumber(value: string): boolean
     {
-        if (this.reValid === null) throw 'No digits defined for isNumber check'
+        if (this.reValid === null) throw new DigitsUndefined('No digits defined for the isNumber check')
         return this.reValid.test(value)
     }
 }
