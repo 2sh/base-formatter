@@ -1,4 +1,4 @@
-/**
+/*
  * base-formatter
  * Copyright (C) 2023 2sh <contact@2sh.me>
  *
@@ -13,21 +13,19 @@ import Decimal from 'decimal.js'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
 /**
- * When to display the radix character for the number:
- * - auto: Only show the radix character with the fraction.
- * - always: Always show the radix character.
+ * - 'auto': Only show the radix character with the fraction.
+ * - 'always': Always show the radix character.
  */
 export type RadixDisplay =
       'auto'
     | 'always'
 
 /**
- * When to display the sign for the number:
- * - auto: sign display for negative numbers only, including negative zero.
- * - always: always display sign.
- * - exceptZero: sign display for positive and negative numbers, but not zero.
- * - negative: sign display for negative numbers only, excluding negative zero.
- * - never: never display sign.
+ * - 'auto': sign display for negative numbers only, including negative zero.
+ * - 'always': always display sign.
+ * - 'exceptZero': sign display for positive and negative numbers, but not zero.
+ * - 'negative': sign display for negative numbers only, excluding negative zero.
+ * - 'never': never display sign.
  */
 export type SignDisplay =
       'auto'
@@ -36,6 +34,18 @@ export type SignDisplay =
     | 'negative'
     | 'never'
 
+/**
+ * - 'ceil': Round towards positive infinity.
+ * - 'floor': Round towards negative infinity.
+ * - 'expand': Round away from zero.
+ * - 'trunc': Round towards zero.
+ * - 'halfCeil': Values above or equal to the half-increment round like ceil, otherwise like floor.
+ * - 'halfFloor': Values above the half-increment round like ceil, otherwise like floor.
+ * - 'halfExpand': Values above or equal to the half-increment round like expand, otherwise like trunc.
+ * - 'halfTrunc': Values above the half-increment round like expand, otherwise like trunc.
+ * - 'halfEven': Like halfExpand, except that on the half-increment values round towards the nearest even digit.
+ * - 'halfOdd': Like halfExpand, except that on the half-increment values round towards the nearest odd digit.
+ */
 export type RoundingMode =
       'ceil'
     | 'floor'
@@ -49,20 +59,30 @@ export type RoundingMode =
     | 'halfOdd'
 
 /**
- * The notation to display the number in:
- * - standard: 
+ * - 'standard': Plain number formatting.
+ * - 'scientific': Return the order-of-magnitude for formatted number.
+ * - 'engineering': Return the exponent of ten when divisible by three.
  */
 export type Notation =
       'standard'
     | 'scientific'
     | 'engineering'
 
+/**
+ * - 'always': Always display the group separators.
+ * - 'min2': Display grouping separators when there are at least 2 digits in a group.
+ * - false: Do not display grouping separators.
+ * - true: alias for 'always'
+ */
 export type UseGrouping =
       false
     | true
     | 'always'
     | 'min2'
 
+/**
+ * The properties of the base class
+ */
 interface Properties
 {
     /**
@@ -105,7 +125,7 @@ interface Properties
      */
     fractionPadCharacter: string | null
 
-    // formatting
+
     /**
      * When to display the radix character
      */
@@ -114,28 +134,75 @@ interface Properties
      * When to display the sign
      */
     signDisplay: SignDisplay
+    /**
+     * How numbers are to be rounded
+     */
     roundingMode: RoundingMode
+    /**
+     * The precision of the number, the number of significant digits.
+     */
     precision: number
-    fractionDigits: number | null // exact number of fraction Digits
+    /**
+     * If specified, the exact number of fraction Digits
+     */
+    fractionDigits: number | null
+    /**
+     * The minimum number of fraction digits to use.
+     * A value with a smaller number of fraction digits than this number will be
+     * right-padded with zeros or the specified fraction pad character.
+     */
     minimumFractionDigits: number
-    maximumFractionDigits: number | null // if not number, no limit other than precision
-    minimumIntegerDigits: number // zero padding
+    /**
+     * The maximum number of fraction digits to use.
+     * If not specified, the maximum number of fraction digits is determined by the precision.
+     */
+    maximumFractionDigits: number | null
+    /**
+     * The minimum number of integer digits to use.
+     * A value with a smaller number of integer digits than this number will be
+     * left-padded with zeros or the specified integer pad character.
+     */
+    minimumIntegerDigits: number
+    /**
+     * The formatting that should be displayed for the number.
+     */
     notation: Notation
+    /**
+     * When numbers are to be grouped.
+     */
     useGrouping: UseGrouping
 }
+/**
+ * The options of the Base class, for adjusting the base settings or encoding formatting.
+ */
 export type Options = Partial<Properties>
 
+/**
+ * The numeral output of the encode method if the base digits have not been specified.
+ */
 export type NumeralOutput =
 {
+    /**
+     * Whether the number is negative.
+     */
     isNegative: boolean,
+    /**
+     * The integer part of the number
+     */
     integer: number[],
+    /**
+     * The fraction part of the number
+     */
     fraction: number[],
+    /**
+     * The exponent of the number
+     */
     exponent: number
 }
 
 function createPadArray(amount: Decimal, character: string): string[]
 {
-    return Array(amount.toNumber()).fill(character)
+    return Array(amount.toNumber()).fill(character) as string[]
 }
 
 const zero = new Decimal(0)
@@ -147,11 +214,6 @@ const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
  * The Base class which encodes and decodes from the chosen base.
- * 
- * @param digits - A string of digits or a base number
- *   If the digits argument is a string, the output of the encode method will be a formatted
- *   string, and if a number, the output of the encode method will be an object
- * @param options - Optional parameters
  */
 export default class Base<Digits extends string | number>
 {
@@ -166,6 +228,12 @@ export default class Base<Digits extends string | number>
     private readonly lnBase3: Decimal
     private readonly baseZero: string
 
+    /**
+     * @param digits - A string of digits or a base number
+     *   If the digits argument is a string, the output of the encode method will be a formatted
+     *   string, and if a number, the output of the encode method will be an object
+     * @param options - Optional parameters, for adjusting the base settings or encoding formatting.
+     */
     constructor(digits: Digits, options?: Options)
     {
         if (typeof digits === 'number')
@@ -251,18 +319,30 @@ export default class Base<Digits extends string | number>
             halfTrunc: (value) => value.greaterThan(halfBase),
             halfCeil: (value, isNegative) => !isNegative ? value.greaterThanOrEqualTo(halfBase) : value.greaterThan(halfBase),
             halfFloor: (value, isNegative) => isNegative ? value.greaterThanOrEqualTo(halfBase) : value.greaterThan(halfBase),
-            halfEven: (value, _, i, values) => value.equals(halfBase)
-                ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(1)
-                : value.greaterThan(halfBase),
-            halfOdd: (value, _, i, values) => value.equals(halfBase)
-                ? values[values[i-1] == null ? i-2 : i-1]!.modulo(2).equals(0)
-                : value.greaterThan(halfBase),
+            halfEven: (value, _, i, values) =>
+            {
+                if (value.equals(halfBase))
+                {
+                    const value = values[values[i-1] === null ? i-2 : i-1]
+                    if (value) return value.modulo(2).equals(1)
+                }
+                return value.greaterThan(halfBase)
+            },
+            halfOdd: (value, _, i, values) =>
+            {
+                if (value.equals(halfBase))
+                {
+                    const value = values[values[i-1] === null ? i-2 : i-1]
+                    if (value) return value.modulo(2).equals(0)
+                }
+                return value.greaterThan(halfBase)
+            }
         }
     }
-
+    
     public static digitsByBase(base: number, options?: Options)
     {
-        if (base > allDigits.length) throw "Can\'t be higher than " + allDigits.length + " digits"
+        if (base > allDigits.length) throw "Can't be higher than " + allDigits.length.toString() + " digits"
         return new Base([...allDigits].slice(0, base).join(''), options)
     }
 
@@ -332,7 +412,7 @@ export default class Base<Digits extends string | number>
     }
 
 
-    private calculateExponent(value: Decimal, isEngineering: boolean = false): Decimal
+    private calculateExponent(value: Decimal, isEngineering = false): Decimal
     {
         if (value.equals(0)) return value
         return value.ln().dividedBy(isEngineering ? this.lnBase3 :this.lnBase).floor().times(isEngineering ? 3 : 1)
@@ -525,7 +605,7 @@ export default class Base<Digits extends string | number>
                 || opts.signDisplay == "auto" && isNegative ? signSymbol : ''
             
             const encodedExponent = makeExponential && !exponent.equals(0)
-                ? (opts.scientificNotationCharacter + this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}))
+                ? (opts.scientificNotationCharacter + (this.encode(exponent, {...this.options, notation: 'standard', fractionDigits: 0, minimumIntegerDigits: 0}) as string))
                 : ''
             
             return outputSignSymbol
