@@ -739,7 +739,7 @@ export default class Base<Digits extends string | number>
     /**
      * @param encodedValue - An encoded number in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
-     * @returns - The decoded number.
+     * @returns The decoded number.
      */
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
@@ -778,7 +778,7 @@ export default class Base<Digits extends string | number>
 
     /**
      * @param value - A string to check.
-     * @returns whether the input string is a number according to the digits and options of the instance.
+     * @returns Whether the input string is a number according to the digits and options of the instance.
      */
     public isNumber(value: string): boolean
     {
