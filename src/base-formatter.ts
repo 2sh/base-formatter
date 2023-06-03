@@ -140,7 +140,7 @@ export interface Options
      */
     digitSeparator?: string
     /**
-     * The scientific notation character, such as the e in `1.342e3`.
+     * The scientific notation character, such as the `e` in `1.342e3`.
      * @defaultValue `'e'`
      */
     scientificNotationCharacter?: string
@@ -424,7 +424,7 @@ export default class Base<Digits extends string | number>
      * an instance of the base class with the sliced string as its digits.
      * @param base - The base number to use, a maximum of `62`.
      * For a higher base number, supply the base class an amount of digits equal to the desired base or
-     * specify it with just a number and receive the output as a {@link NumeralObject}.
+     * specify it with just a number and receive the output as a {@link NumeralOutput}.
      * @param options - The options to use.
      * @returns An instance of the base class.
      * @throws {@link MaximumBaseExceeded}
