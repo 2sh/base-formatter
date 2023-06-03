@@ -21,5 +21,14 @@ base16Greek.encode(5e-6, {notation: 'scientific', maximumFractionDigits: 3}) // 
 
 dozenal.decode('↊;9429e↊') // 667430129664
 dozenal.isNumber('↊;9429e↊') // true
+
+// Making use of numeral outputs:
+const base120 = new Base(120)
+base120.encode(-1440)
+// { isNegative: true, integer: [ 12, 0 ], fraction: [], exponent: 0 }
+base120.encode(6347544.3456, {notation: 'scientific', maximumFractionDigits: 5})
+// { isNegative: false, integer: [ 3 ], fraction: [ 80, 96, 24, 41, 57 ], exponent: 3 }
+base120.decode({ isNegative: false, integer: [ 3 ], fraction: [ 80, 96, 24, 41, 57 ], exponent: 3 })
+// 6347544.345625
 ```
 (decimal.js values can also be encoded for more precision.)
