@@ -1,12 +1,11 @@
 # Logs
-logs
+logs/
 *.log
 yarn-debug.log*
 yarn-error.log*
 
-node_modules
-build
-dist
-docs
-
-test/test.ts
+node_modules/
+build/
+dist/
+docs/
+testing/
