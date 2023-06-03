@@ -10,7 +10,7 @@
  * A Javascript library for encoding numbers to different radixes/bases with many formatting options.
  * 
  * The `base-formatter` defines the {@link default} class, which is used to
- * create a base instance for encoding and decoding numbers.
+ * create a Base instance for encoding and decoding numbers.
  * 
  * @packageDocumentation
  */
@@ -264,12 +264,12 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The class from which to create a base instance for encoding and decoding numbers.
+ * The class from which to create a Base instance for encoding and decoding numbers.
  * @typeParam Digits - The type of the `digits` argument,
  * determining the output type of the {@link Base.encode} method.
  * @category Main
  */
-export default class Base<Digits extends string | number>
+export class Base<Digits extends string | number>
 {
     /**
      * The inferred base, from either the number of digits or the number passed to the digits argument of the constructor.
@@ -307,7 +307,7 @@ export default class Base<Digits extends string | number>
     private readonly baseZero: string
 
     /**
-     * The constructor of the base class.
+     * The constructor of the Base class.
      * @param digits - A string of digits, the length of which determining the base number, or a base number.
      * If the digits argument is a string, the output of the {@link encode} method will be a formatted
      * string, and if a number, the output of the {@link encode} method will be a {@link NumeralOutput} object.
@@ -421,12 +421,12 @@ export default class Base<Digits extends string | number>
     
     /**
      * This method will take the base number, slice a string of digits 0-9A-Za-z and return
-     * an instance of the base class with the sliced string as its digits.
+     * an instance of the Base class with the sliced string as its digits.
      * @param base - The base number to use, a maximum of `62`.
-     * For a higher base number, supply the base class an amount of digits equal to the desired base or
+     * For a higher base number, supply the Base class an amount of digits equal to the desired base or
      * specify it with just a number and receive the output as a {@link NumeralOutput}.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @throws {@link MaximumBaseExceeded}
      * Thrown when the base number exceeds the maximum amount of this method.
      * @category Static
@@ -438,79 +438,79 @@ export default class Base<Digits extends string | number>
     }
 
     /**
-     * This method returns an instance of the base class in base 2 with the digits `'01'`.
+     * This method returns an instance of the Base class in base 2 with the digits `'01'`.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static binary(options?: Options) { return Base.digitsByBase(2, options) }
     /**
-     * This method returns an instance of the base class in base 8 with the digits `'01234567'`.
+     * This method returns an instance of the Base class in base 8 with the digits `'01234567'`.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static octal(options?: Options) { return Base.digitsByBase(8, options) }
     /**
-     * This method returns an instance of the base class in base 10 with the digits `'0123456789'`.
+     * This method returns an instance of the Base class in base 10 with the digits `'0123456789'`.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
     /**
-     * This method returns an instance of the base class in base 16 with the digits `'0123456789ABCDEF'`.
+     * This method returns an instance of the Base class in base 16 with the digits `'0123456789ABCDEF'`.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits `'0123456789↊↋'` and the radix character of `';'`.
+     * This method returns an instance of the Base class in base 12 with the digits `'0123456789↊↋'` and the radix character of `';'`.
      * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
+     * This method returns an instance of the Base class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
      * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link Base.dozenal} method in case a font doesn't have them.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits `'0123456789XE'` and the radix character of `';'`.
+     * This method returns an instance of the Base class in base 12 with the digits `'0123456789XE'` and the radix character of `';'`.
      * Uses a variant of the digit for 10 using the Roman numeral X.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits `'0123456789AB'`.
+     * This method returns an instance of the Base class in base 12 with the digits `'0123456789AB'`.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
     /**
-     * This method returns an instance of the base class in base 20 with the digits `'0123456789ABCDEFGHJK'`,
+     * This method returns an instance of the Base class in base 20 with the digits `'0123456789ABCDEFGHJK'`,
      * skipping over I in order to avoid confusion between I and 1.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
     /**
-     * This method returns an instance of the base class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
+     * This method returns an instance of the Base class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static base57(options?: Options)
@@ -524,9 +524,9 @@ export default class Base<Digits extends string | number>
         return new Base(digits, options)
     }
     /**
-     * This method returns an instance of the base class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
+     * This method returns an instance of the Base class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static base58(options?: Options)
@@ -539,9 +539,9 @@ export default class Base<Digits extends string | number>
         return new Base(digits, options)
     }
     /**
-     * This method returns an instance of the base class in base 60 with the digits 0-9A-Ba-b without the characters l0.
+     * This method returns an instance of the Base class in base 60 with the digits 0-9A-Ba-b without the characters l0.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static sexagesimal(options?: Options)
@@ -552,9 +552,9 @@ export default class Base<Digits extends string | number>
         return new Base(digits, options)
     }
     /**
-     * This method returns an instance of the base class in base 60 using cuneiform digits.
+     * This method returns an instance of the Base class in base 60 using cuneiform digits.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static cuneiform(options?: Options)
@@ -572,16 +572,16 @@ export default class Base<Digits extends string | number>
         })
     }
     /**
-     * This method returns an instance of the base class in base 62 with the digits 0-9A-Ba-b.
+     * This method returns an instance of the Base class in base 62 with the digits 0-9A-Ba-b.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static base62(options?: Options) { return Base.digitsByBase(62, options) }
     /**
-     * This method returns an instance of the base class in base 98 using Unicode domino tiles.
+     * This method returns an instance of the Base class in base 98 using Unicode domino tiles.
      * @param options - The options to use.
-     * @returns An instance of the base class.
+     * @returns An instance of the Base class.
      * @category Static
      */
     public static domino(options?: Options)
@@ -948,3 +948,4 @@ export default class Base<Digits extends string | number>
         return this.reValid.test(value)
     }
 }
+export default Base
