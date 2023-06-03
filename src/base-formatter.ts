@@ -13,19 +13,19 @@ import Decimal from 'decimal.js'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
 /**
- * - 'auto': Only show the radix character with the fraction.
- * - 'always': Always show the radix character.
+ * - `'auto'`: Only show the radix character with the fraction.
+ * - `'always'`: Always show the radix character.
  */
 export type RadixDisplay =
       'auto'
     | 'always'
 
 /**
- * - 'auto': sign display for negative numbers only, including negative zero.
- * - 'always': always display sign.
- * - 'exceptZero': sign display for positive and negative numbers, but not zero.
- * - 'negative': sign display for negative numbers only, excluding negative zero.
- * - 'never': never display sign.
+ * - `'auto'`: sign display for negative numbers only, including negative zero.
+ * - `'always'`: always display sign.
+ * - `'exceptZero'`: sign display for positive and negative numbers, but not zero.
+ * - `'negative'`: sign display for negative numbers only, excluding negative zero.
+ * - `'never'`: never display sign.
  */
 export type SignDisplay =
       'auto'
@@ -35,16 +35,16 @@ export type SignDisplay =
     | 'never'
 
 /**
- * - 'ceil': Round towards positive infinity.
- * - 'floor': Round towards negative infinity.
- * - 'expand': Round away from zero.
- * - 'trunc': Round towards zero.
- * - 'halfCeil': Values above or equal to the half-increment round like ceil, otherwise like floor.
- * - 'halfFloor': Values above the half-increment round like ceil, otherwise like floor.
- * - 'halfExpand': Values above or equal to the half-increment round like expand, otherwise like trunc.
- * - 'halfTrunc': Values above the half-increment round like expand, otherwise like trunc.
- * - 'halfEven': Like halfExpand, except that on the half-increment values round towards the nearest even digit.
- * - 'halfOdd': Like halfExpand, except that on the half-increment values round towards the nearest odd digit.
+ * - `'ceil'`: Round towards positive infinity.
+ * - `'floor'`: Round towards negative infinity.
+ * - `'expand'`: Round away from zero.
+ * - `'trunc'`: Round towards zero.
+ * - `'halfCeil'`: Values above or equal to the half-increment round like ceil, otherwise like floor.
+ * - `'halfFloor'`: Values above the half-increment round like ceil, otherwise like floor.
+ * - `'halfExpand'`: Values above or equal to the half-increment round like expand, otherwise like trunc.
+ * - `'halfTrunc'`: Values above the half-increment round like expand, otherwise like trunc.
+ * - `'halfEven'`: Like halfExpand, except that on the half-increment values round towards the nearest even digit.
+ * - `'halfOdd'`: Like halfExpand, except that on the half-increment values round towards the nearest odd digit.
  */
 export type RoundingMode =
       'ceil'
@@ -59,9 +59,9 @@ export type RoundingMode =
     | 'halfOdd'
 
 /**
- * - 'standard': Plain number formatting.
- * - 'scientific': Return the order-of-magnitude for formatted number.
- * - 'engineering': Return the exponent of ten when divisible by three.
+ * - `'standard'`: Plain number formatting.
+ * - `'scientific'`: Return the order-of-magnitude for formatted number.
+ * - `'engineering'`: Return the exponent of ten when divisible by three.
  */
 export type Notation =
       'standard'
@@ -69,106 +69,131 @@ export type Notation =
     | 'engineering'
 
 /**
- * - 'always': Always display the group separators.
- * - 'min2': Display grouping separators when there are at least 2 digits in a group.
- * - false: Do not display grouping separators.
- * - true: alias for 'always'.
+ * - `'always'`: Always display the group separators.
+ * - `'min2'`: Display grouping separators when there are at least 2 digits in a group.
+ * - `false`: Do not display grouping separators.
+ * - `true`: alias for 'always'.
  */
 export type UseGrouping =
       false
     | true
     | 'always'
     | 'min2'
-
+/*
+    fractionDigits: null,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: null,
+    minimumIntegerDigits: 0,
+    notation: 'standard',
+    useGrouping: false,
+*/
 /**
  * The Options of the base class.
  */
 export type Options =
 {
     /**
-     * The radix character, or "decimal" point/mark/separator, such as the point in 0.5).
+     * The radix character, or "decimal" point/mark/separator, such as the point in `0.5`).
+     * The defaults is `'.'`.
      */
     radixCharacter?: string
     /**
-     * The negative sign, such as a minus(-).
+     * The negative sign.
+     * The default is `'-'`.
      */
     negativeSign?: string
     /**
-     * The positive sign, such as a plus(+).
+     * The positive sign.
+     * The default is `'+'`.
      */
     positiveSign?: string
     /**
-     * The grouping separator, such as the commas in 100,000,000
+     * The grouping separator, such as the commas in `100,000,000`.
+     * The default is `','`.
      */
     groupingSeparator?: string
     /**
-     * The grouping length, the distance between grouping separators, e.g. with a length of 2: 1,00,00,00
+     * The grouping length, the distance between grouping separators, e.g. with a length of 2: `1,00,00,00`.
+     * The default is `3`.
      */
     groupingLength?: number
     /**
      * The digit separator, if specified, will be places between every digit without a grouping separator.
+     * The default is an empty string: `''`.
      */
     digitSeparator?: string
     /**
-     * The scientific notation character, such as the e in 1.342e3
+     * The scientific notation character, such as the e in `1.342e3`.
+     * The default is `'e'`.
      */
     scientificNotationCharacter?: string
     /**
      * The integer pad character, padding the left side of the integer.
-     * By default the specific character for zero,
-     * but could also be a ' ' space char for example.
+     * By default (`null`) the specified digit for zero is used,
+     * but could also be a `' '` space char for example.
      */
     integerPadCharacter?: string | null // the digit zero char if not string
     /**
      * The fraction pad character, padding the right side of the fraction.
-     * By default the specific character for zero, but could also be a ' ' space char for example.
+     * By default (`null`) the specified digit for zero is used, but could also be a `' '` space char for example.
      */
     fractionPadCharacter?: string | null
 
 
     /**
      * When to display the radix character.
+     * The default is `'auto'`.
      */
     radixDisplay?: RadixDisplay
     /**
      * When to display the sign.
+     * The default is `'auto'`.
      */
     signDisplay?: SignDisplay
     /**
      * How numbers are to be rounded.
+     * The default is `'halfExpand'`.
      */
     roundingMode?: RoundingMode
     /**
      * The precision of the number, the number of significant digits.
+     * The default is `32`.
      */
     precision?: number
     /**
      * If specified, the exact number of fraction Digits.
+     * The default is `null`, meaning no limit, though
+     * overridable by minimumFractionDigits and maximumFractionDigits.
      */
     fractionDigits?: number | null
     /**
      * The minimum number of fraction digits to use.
      * A value with a smaller number of fraction digits than this number will be
      * right-padded with zeros or the specified fraction pad character.
+     * The default is `0`.
      */
     minimumFractionDigits?: number
     /**
      * The maximum number of fraction digits to use.
      * If not specified, the maximum number of fraction digits is determined by the precision.
+     * The default is `null`, meaning no maximum number.
      */
     maximumFractionDigits?: number | null
     /**
      * The minimum number of integer digits to use.
      * A value with a smaller number of integer digits than this number will be
      * left-padded with zeros or the specified integer pad character.
+     * The default is `0`.
      */
     minimumIntegerDigits?: number
     /**
      * The formatting that should be displayed for the number.
+     * The default is `'standard'`.
      */
     notation?: Notation
     /**
      * When numbers are to be grouped.
+     * The default is `false`.
      */
     useGrouping?: UseGrouping
 }
@@ -213,7 +238,7 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The base class which encodes and decodes from the chosen base.
+ * The base class which encodes to and decodes from the chosen base.
  */
 export default class Base<Digits extends string | number>
 {
@@ -347,9 +372,9 @@ export default class Base<Digits extends string | number>
     }
     
     /**
-     * This method will take the base number, slice a string of digits (0-9A-Za-z) and return
-     * and instance of the base class with the sliced string as its digits.
-     * @param base - The base number to use. A maximum of 62.
+     * This method will take the base number, slice a string of digits 0-9A-Za-z and return
+     * an instance of the base class with the sliced string as its digits.
+     * @param base - The base number to use. For this method, a maximum of `62`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
@@ -360,31 +385,31 @@ export default class Base<Digits extends string | number>
     }
 
     /**
-     * This method returns an instance of the base class in base 2 with the digits 01.
+     * This method returns an instance of the base class in base 2 with the digits `'01'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
     public static binary(options?: Options) { return Base.digitsByBase(2, options) }
     /**
-     * This method returns an instance of the base class in base 8 with the digits 01234567.
+     * This method returns an instance of the base class in base 8 with the digits `'01234567'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
     public static octal(options?: Options) { return Base.digitsByBase(8, options) }
     /**
-     * This method returns an instance of the base class in base 10 with the digits 0123456789.
+     * This method returns an instance of the base class in base 10 with the digits `'0123456789'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
     public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
     /**
-     * This method returns an instance of the base class in base 16 with the digits 0123456789ABCDEF.
+     * This method returns an instance of the base class in base 16 with the digits `'0123456789ABCDEF'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
     public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits 0123456789↊↋ and the radix character of ';'.
+     * This method returns an instance of the base class in base 12 with the digits `'0123456789↊↋'` and the radix character of `';'`.
      * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
      * @param options - The options to use.
      * @returns An instance of the base class.
@@ -392,7 +417,7 @@ export default class Base<Digits extends string | number>
     public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits 0123456789TE and the radix character of ';'.
+     * This method returns an instance of the base class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
      * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the dozenal() method in case a font doesn't have them.
      * @param options - The options to use.
      * @returns An instance of the base class.
@@ -400,7 +425,7 @@ export default class Base<Digits extends string | number>
     public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits 0123456789XE and the radix character of ';'.
+     * This method returns an instance of the base class in base 12 with the digits `'0123456789XE'` and the radix character of `';'`.
      * Uses a variant of the digit for 10 using the Roman numeral X.
      * @param options - The options to use.
      * @returns An instance of the base class.
@@ -408,13 +433,13 @@ export default class Base<Digits extends string | number>
     public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the base class in base 12 with the digits 0123456789AB.
+     * This method returns an instance of the base class in base 12 with the digits `'0123456789AB'`.
      * @param options - The options to use.
      * @returns An instance of the base class.
      */
     public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
     /**
-     * This method returns an instance of the base class in base 20 with the digits 0123456789ABCDEFGHJK,
+     * This method returns an instance of the base class in base 20 with the digits `'0123456789ABCDEFGHJK'`,
      * skipping over I in order to avoid confusion between I and 1.
      * @param options - The options to use.
      * @returns An instance of the base class.
