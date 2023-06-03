@@ -22,17 +22,17 @@ import Decimal from 'decimal.js'
 
 /**
  * Thrown if the base number exceeds the maximum.
- * @category Error
+ * @group Exceptions
  **/
 export class MaximumBaseExceeded extends Error {}
 /**
  * Thrown if there are no digits specified for the instance when required by a method.
- * @category Error
+ * @group Exceptions
  **/
 export class DigitsUndefined extends Error {}
 /**
  * Thrown if the matching digit is not found.
- * @category Error
+ * @group Exceptions
  */
 export class DigitNotFound extends Error {}
 
@@ -267,7 +267,6 @@ const allDigits = numbers + asciiUppercase + asciiLowercase
  * The class from which to create a Base instance for encoding and decoding numbers.
  * @typeParam Digits - The type of the `digits` argument,
  * determining the output type of the {@link Base.encode} method.
- * @category Main
  */
 export class Base<Digits extends string | number>
 {
@@ -427,9 +426,8 @@ export class Base<Digits extends string | number>
      * specify it with just a number and receive the output as a {@link NumeralOutput}.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @throws {@link MaximumBaseExceeded}
-     * Thrown when the base number exceeds the maximum amount of this method.
-     * @category Static
+     * @throws {@link MaximumBaseExceeded} when the base number exceeds the maximum amount of this method.
+     * @group Static Methods
      */
     public static digitsByBase(base: number, options?: Options)
     {
@@ -441,28 +439,28 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 2 with the digits `'01'`.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static binary(options?: Options) { return Base.digitsByBase(2, options) }
     /**
      * This method returns an instance of the Base class in base 8 with the digits `'01234567'`.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static octal(options?: Options) { return Base.digitsByBase(8, options) }
     /**
      * This method returns an instance of the Base class in base 10 with the digits `'0123456789'`.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
     /**
      * This method returns an instance of the Base class in base 16 with the digits `'0123456789ABCDEF'`.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
     /**
@@ -470,7 +468,7 @@ export class Base<Digits extends string | number>
      * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
@@ -479,7 +477,7 @@ export class Base<Digits extends string | number>
      * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link Base.dozenal} method in case a font doesn't have them.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
@@ -488,7 +486,7 @@ export class Base<Digits extends string | number>
      * Uses a variant of the digit for 10 using the Roman numeral X.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
@@ -496,7 +494,7 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 12 with the digits `'0123456789AB'`.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
     /**
@@ -504,14 +502,14 @@ export class Base<Digits extends string | number>
      * skipping over I in order to avoid confusion between I and 1.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
     /**
      * This method returns an instance of the Base class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static base57(options?: Options)
     {
@@ -527,7 +525,7 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static base58(options?: Options)
     {
@@ -542,7 +540,7 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 60 with the digits 0-9A-Ba-b without the characters l0.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static sexagesimal(options?: Options)
     {
@@ -555,7 +553,7 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 60 using cuneiform digits.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static cuneiform(options?: Options)
     {
@@ -575,14 +573,14 @@ export class Base<Digits extends string | number>
      * This method returns an instance of the Base class in base 62 with the digits 0-9A-Ba-b.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static base62(options?: Options) { return Base.digitsByBase(62, options) }
     /**
      * This method returns an instance of the Base class in base 98 using Unicode domino tiles.
      * @param options - The options to use.
      * @returns An instance of the Base class.
-     * @category Static
+     * @group Static Methods
      */
     public static domino(options?: Options)
     {
@@ -607,7 +605,7 @@ export class Base<Digits extends string | number>
      * @param value - The value of which to calculate the exponent.
      * @param isEngineering - Whether to use the engineering notation.
      * @returns The exponent.
-     * @category Instance
+     * @group Instance Methods
      */
     private calculateExponent(value: Decimal | number, isEngineering = false): number
     {
@@ -625,7 +623,7 @@ export class Base<Digits extends string | number>
     /**
      * @param value - The integer value to convert to the base.
      * @returns A number array of the value in the instance base.
-     * @category Instance
+     * @group Instance Methods
      */
     private convertIntegerToBase(value: Decimal): Decimal[]
     {
@@ -646,7 +644,7 @@ export class Base<Digits extends string | number>
      * @param value - The number array to encode.
      * @param opts - The options used.
      * @returns The encoded value.
-     * @category Instance
+     * @group Instance Methods
      */
     private encodeInteger(value: (Decimal | string)[], opts: Properties): string
     {
@@ -679,7 +677,7 @@ export class Base<Digits extends string | number>
      * @param value - The fraction value to convert to the base.
      * @param precision - The fraction precision, the maximum length of the fraction.
      * @returns A number array of the value in the instance base.
-     * @category Instance
+     * @group Instance Methods
      */
     private convertFractionalToBase(value: Decimal, precision: Decimal): Decimal[]
     {
@@ -699,11 +697,9 @@ export class Base<Digits extends string | number>
      * Encode a single digit.
      * @param value - The number to convert.
      * @returns The encoded digit.
-     * @throws {@link DigitsUndefined}
-     * Thrown when the digits are undefined.
-     * @throws {@link DigitNotFound}
-     * Thrown when no digit could be found for the specified number.
-     * @category Instance
+     * @throws {@link DigitsUndefined} when the digits are undefined.
+     * @throws {@link DigitNotFound} when no digit could be found for the specified number.
+     * @group Instance Methods
      */
     private encodeDigit(value: number): string
     {
@@ -716,11 +712,9 @@ export class Base<Digits extends string | number>
      * Decode a single digit.
      * @param value - The digit to convert to a number.
      * @returns The decoded digit.
-     * @throws {@link DigitsUndefined}
-     * Thrown when the digits are undefined.
-     * @throws {@link DigitNotFound}
-     * Thrown when the string is not found in the digits.
-     * @category Instance
+     * @throws {@link DigitsUndefined} when the digits are undefined.
+     * @throws {@link DigitNotFound} when the string is not found in the digits.
+     * @group Instance Methods
      */
     private decodeDigit(value: string): number
     {
@@ -736,7 +730,7 @@ export class Base<Digits extends string | number>
      * @param options - The options to use for formatting.
      * @returns The encoded number as a string if digits were passed to the instance,
      * otherwise a {@link NumeralOutput} object.
-     * @category Instance
+     * @group Instance Methods
      */
     public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
     public encode(numberValue: number | string | Decimal, options?: Options): NumeralOutput | string
@@ -881,7 +875,7 @@ export class Base<Digits extends string | number>
      * @param integerLength - How much of the encoded number is the integer partm.
      * @param exponent - The exponent of the number.
      * @returns The decoded value.
-     * @category Instance
+     * @group Instance Methods
      */
     private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
@@ -894,11 +888,9 @@ export class Base<Digits extends string | number>
      * @param encodedValue - An encoded number in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
      * @returns The decoded number.
-     * @throws {@link DigitsUndefined}
-     * Thrown when the digits are undefined.
-     * @throws {@link DigitNotFound}
-     * Thrown when the specified string contains unknown characters.
-     * @category Instance
+     * @throws {@link DigitsUndefined} when the digits are undefined.
+     * @throws {@link DigitNotFound} when the specified string contains unknown characters.
+     * @group Instance Methods
      */
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
@@ -944,9 +936,8 @@ export class Base<Digits extends string | number>
     /**
      * @param value - A string to check.
      * @returns Whether the input string is a number according to the digits and options of the instance.
-     * @throws {@link DigitsUndefined}
-     * Thrown when the digits are undefined.
-     * @category Instance
+     * @throws {@link DigitsUndefined} when the digits are undefined.
+     * @group Instance Methods
      */
     public isNumber(value: string): boolean
     {
