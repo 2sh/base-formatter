@@ -735,7 +735,7 @@ export class Base<Digits extends string | number>
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
      * @returns The encoded number as a string if digits were passed to the instance,
-     *   otherwise a {@link NumeralOutput} object.
+     * otherwise a {@link NumeralOutput} object.
      * @category Instance
      */
     public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
