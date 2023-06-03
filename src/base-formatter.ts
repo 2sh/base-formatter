@@ -886,6 +886,7 @@ export class Base<Digits extends string | number>
     private calculateValue(isNegative: boolean, encodedNumber: number[], integerLength: number, exponent: number): number
     {
         const largestExponent = integerLength - 1
+        console.log(largestExponent)
         return encodedNumber.reduce((a, c, i) => a + c * Math.pow(this.base, largestExponent-i), 0)
             * Math.pow(this.base, exponent) * (isNegative ? -1 : 1)
     }
@@ -926,12 +927,18 @@ export class Base<Digits extends string | number>
             .replaceAll(opts.groupingSeparator, '')
             .replaceAll(opts.digitSeparator, '')
 
-        const radixCharIndex = cleanedValue.indexOf(opts.radixCharacter)
+        const valueArray = [...cleanedValue]
 
-        const integerLength = radixCharIndex >= 0 ? radixCharIndex : cleanedValue.length
+        const radixCharIndex = valueArray.indexOf(opts.radixCharacter)
+
+        const integerLength = radixCharIndex >= 0 ? radixCharIndex : valueArray.length
+
+        const pureNumberValueArray = radixCharIndex >= 0
+            ? [...valueArray.slice(0, radixCharIndex), ...valueArray.slice(radixCharIndex+1)]
+            : valueArray
 
         return this.calculateValue(isNegative,
-            [...cleanedValue.replace(opts.radixCharacter, '')].map((d) => this.decodeDigit(d)),
+            pureNumberValueArray.map((d) => this.decodeDigit(d)),
             integerLength, exponent)
     }
 

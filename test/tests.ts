@@ -93,7 +93,8 @@ test('decoding', (t) =>
 {
     t.equal(Math.floor(base120Numerals.decode(complexOutput)), complexInput)
     t.equal(dozenal.decode('100;6  '), 144.5)
-    t.equal(dozenal.decode('84;4↊e6'), 299801088)
+    t.equal(dozenal.decode('257↊0;6'), 51240.5)
+    t.equal(domino.decode('🁨🁵🁕🁢🁆'), 51234.5)
     t.end()
 })
 
