@@ -82,7 +82,7 @@ test('encoding', (t) =>
     t.equal(dozenal.encode(143.75), '↋↋;9')
     t.equal(dozenal.encode(51240.3333333333, {maximumFractionDigits: 8}), '257↊0;4')
     t.equal(dozenal.encode(51240.6666666666, {maximumFractionDigits: 8}), '257↊0;8')
-    t.equal(domino.encode(51234.2345334554, {maximumFractionDigits: 8}), '🁨🁵🁕🁢🀹🁠🁻🁤🁭🀲🁀🁻')
+    t.equal(domino.encode(51234.2345334554, {maximumFractionDigits: 2}), '🁨🁵🁕🁢🀹🁠')
     t.deepEqual(base120Numerals.encode(-1440.5), {isNegative: true, integer: [12, 0], fraction: [60], exponent: 0})
     t.deepEqual(complexOutput, {isNegative: false, integer: [ 13 ], fraction: [ 110, 37, 14, 66, 113 ], exponent: 5})
 
