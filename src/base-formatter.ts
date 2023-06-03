@@ -72,7 +72,7 @@ export type Notation =
  * - 'always': Always display the group separators.
  * - 'min2': Display grouping separators when there are at least 2 digits in a group.
  * - false: Do not display grouping separators.
- * - true: alias for 'always'
+ * - true: alias for 'always'.
  */
 export type UseGrouping =
       false
@@ -81,20 +81,20 @@ export type UseGrouping =
     | 'min2'
 
 /**
- * The Options of the base class
+ * The Options of the base class.
  */
 export type Options =
 {
     /**
-     * The radix character, or "decimal" point/mark/separator, such as the point in 0.5)
+     * The radix character, or "decimal" point/mark/separator, such as the point in 0.5).
      */
     radixCharacter?: string
     /**
-     * The negative sign, such as a minus(-)
+     * The negative sign, such as a minus(-).
      */
     negativeSign?: string
     /**
-     * The positive sign, such as a plus(+)
+     * The positive sign, such as a plus(+).
      */
     positiveSign?: string
     /**
@@ -106,7 +106,7 @@ export type Options =
      */
     groupingLength?: number
     /**
-     * The digit separator, if specified, will be places between every digit without a grouping separator
+     * The digit separator, if specified, will be places between every digit without a grouping separator.
      */
     digitSeparator?: string
     /**
@@ -116,26 +116,26 @@ export type Options =
     /**
      * The integer pad character, padding the left side of the integer.
      * By default the specific character for zero,
-     * but could also be a ' ' space char for example
+     * but could also be a ' ' space char for example.
      */
     integerPadCharacter?: string | null // the digit zero char if not string
     /**
      * The fraction pad character, padding the right side of the fraction.
-     * By default the specific character for zero, but could also be a ' ' space char for example
+     * By default the specific character for zero, but could also be a ' ' space char for example.
      */
     fractionPadCharacter?: string | null
 
 
     /**
-     * When to display the radix character
+     * When to display the radix character.
      */
     radixDisplay?: RadixDisplay
     /**
-     * When to display the sign
+     * When to display the sign.
      */
     signDisplay?: SignDisplay
     /**
-     * How numbers are to be rounded
+     * How numbers are to be rounded.
      */
     roundingMode?: RoundingMode
     /**
@@ -143,7 +143,7 @@ export type Options =
      */
     precision?: number
     /**
-     * If specified, the exact number of fraction Digits
+     * If specified, the exact number of fraction Digits.
      */
     fractionDigits?: number | null
     /**
@@ -187,15 +187,15 @@ export type NumeralOutput =
      */
     isNegative: boolean,
     /**
-     * The integer part of the number
+     * The integer part of the number.
      */
     integer: number[],
     /**
-     * The fraction part of the number
+     * The fraction part of the number.
      */
     fraction: number[],
     /**
-     * The exponent of the number
+     * The exponent of the number.
      */
     exponent: number
 }
@@ -217,8 +217,14 @@ const allDigits = numbers + asciiUppercase + asciiLowercase
  */
 export default class Base<Digits extends string | number>
 {
-    public readonly digits: string[] | null
+    /**
+     * The inferred base, from either the number of digits or the number passed to the digits argument of the constructor.
+     */
     public readonly base: number
+    /**
+     * The digits to use.
+     */
+    public readonly digits: string[] | null
     private readonly options: Properties
     private readonly reValid: RegExp | null
     private readonly roundingModes: {
@@ -231,7 +237,7 @@ export default class Base<Digits extends string | number>
     /**
      * @param digits - A string of digits or a base number
      *   If the digits argument is a string, the output of the encode method will be a formatted
-     *   string, and if a number, the output of the encode method will be an object
+     *   string, and if a number, the output of the encode method will be an object.
      * @param options - Optional parameters, for adjusting the base settings or encoding formatting.
      */
     constructor(digits: Digits, options?: Options)
@@ -340,24 +346,85 @@ export default class Base<Digits extends string | number>
         }
     }
     
+    /**
+     * This method will take the base number, slice a string of digits (0-9A-Za-z) and return
+     * and instance of the base class with the sliced string as its digits.
+     * @param base - The base number to use. A maximum of 62.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static digitsByBase(base: number, options?: Options)
     {
         if (base > allDigits.length) throw "Can't be higher than " + allDigits.length.toString() + " digits"
         return new Base([...allDigits].slice(0, base).join(''), options)
     }
 
+    /**
+     * This method returns an instance of the base class in base 2 with the digits 01.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static binary(options?: Options) { return Base.digitsByBase(2, options) }
+    /**
+     * This method returns an instance of the base class in base 8 with the digits 01234567.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static octal(options?: Options) { return Base.digitsByBase(8, options) }
+    /**
+     * This method returns an instance of the base class in base 10 with the digits 0123456789.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static decimal(options?: Options) { return Base.digitsByBase(10, options) }
+    /**
+     * This method returns an instance of the base class in base 16 with the digits 0123456789ABCDEF.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static hexadecimal(options?: Options) { return Base.digitsByBase(16, options) }
+    /**
+     * This method returns an instance of the base class in base 12 with the digits 0123456789↊↋ and the radix character of ';'.
+     * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static dozenal(options?: Options)
         { return new Base(numbers + '↊↋', {radixCharacter: ';', ...options}) }
+    /**
+     * This method returns an instance of the base class in base 12 with the digits 0123456789TE and the radix character of ';'.
+     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the dozenal() method in case a font doesn't have them.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static dozenalInitials(options?: Options)
         { return new Base(numbers + 'TE', {radixCharacter: ';', ...options}) }
+    /**
+     * This method returns an instance of the base class in base 12 with the digits 0123456789XE and the radix character of ';'.
+     * Uses a variant of the digit for 10 using the Roman numeral X.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static dozenalRoman(options?: Options)
         { return new Base(numbers + 'XE', {radixCharacter: ';', ...options}) }
+    /**
+     * This method returns an instance of the base class in base 12 with the digits 0123456789AB.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static duodecimal(options?: Options) { return Base.digitsByBase(12, options) }
-    public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) } // skipping over I
+    /**
+     * This method returns an instance of the base class in base 20 with the digits 0123456789ABCDEFGHJK,
+     * skipping over I in order to avoid confusion between I and 1.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
+    public static vigesimal(options?: Options) { return new Base(numbers + "ABCDEFGHJK", options) }
+    /**
+     * This method returns an instance of the base class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static base57(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -368,6 +435,11 @@ export default class Base<Digits extends string | number>
             .replace('0', '')
         return new Base(digits, options)
     }
+    /**
+     * This method returns an instance of the base class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static base58(options?: Options)
     {
         const digits = (numbers + asciiUppercase + asciiLowercase)
@@ -377,7 +449,23 @@ export default class Base<Digits extends string | number>
             .replace('0', '')
         return new Base(digits, options)
     }
-    public static sexagesimal(options?: Options) { return Base.digitsByBase(60, options) }
+    /**
+     * This method returns an instance of the base class in base 60 with the digits 0-9A-Ba-b without the characters l0.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
+    public static sexagesimal(options?: Options)
+    {
+        const digits = (numbers + asciiUppercase + asciiLowercase)
+            .replace('l', '')
+            .replace('O', '')
+        return new Base(digits, options)
+    }
+    /**
+     * This method returns an instance of the base class in base 60 using cuneiform digits.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static cuneiform(options?: Options)
     {
         const ones = [...'𒑊𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝']
@@ -392,7 +480,17 @@ export default class Base<Digits extends string | number>
             ...options
         })
     }
+    /**
+     * This method returns an instance of the base class in base 62 with the digits 0-9A-Ba-b.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static base62(options?: Options) { return Base.digitsByBase(62, options) }
+    /**
+     * This method returns an instance of the base class in base 98 using Unicode domino tiles.
+     * @param options - The options to use.
+     * @returns An instance of the base class.
+     */
     public static domino(options?: Options)
     {
         const chars =
@@ -488,6 +586,13 @@ export default class Base<Digits extends string | number>
         return digitIndex
     }
 
+    /**
+     * Encodes the input number into the instance base, according to the chosen formatting options.
+     * @param numberValue - The number to encode, as a number, string or Decimal type.
+     * @param options - The options to use for formatting.
+     * @returns The encoded number as a string if digits were passed to the instance,
+     *   otherwise a numeral output object.
+     */
     public encode(numberValue: number | string | Decimal, options?: Options): Digits extends number ? NumeralOutput : string
     public encode(numberValue: number | string | Decimal, options?: Options): NumeralOutput | string
     {
@@ -631,6 +736,11 @@ export default class Base<Digits extends string | number>
             * Math.pow(this.base, exponent) * (isNegative ? -1 : 1)
     }
 
+    /**
+     * @param encodedValue - An encoded number in the instance base.
+     * @param options - The options to use if, e.g. alternative characters were used.
+     * @returns - The decoded number.
+     */
     public decode(encodedValue: string | NumeralOutput, options?: Options): number
     {
         if (typeof encodedValue !== "string")
@@ -666,6 +776,10 @@ export default class Base<Digits extends string | number>
             integerLength, exponent)
     }
 
+    /**
+     * @param value - A string to check.
+     * @returns whether the input string is a number according to the digits and options of the instance.
+     */
     public isNumber(value: string): boolean
     {
         if (this.reValid === null) throw 'No digits defined for isNumber check'
