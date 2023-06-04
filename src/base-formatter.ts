@@ -260,7 +260,7 @@ function createPadArray(length: Decimal, character: string): string[]
 /**
  * @param value - The integer value to convert.
  * @param base - The base.
- * @returns A number array of the integer value in the given base.
+ * @returns A number array of the integer value in the specified base.
  */
 function convertIntegerToBase(value: Decimal, base: number): Decimal[]
 {
@@ -280,7 +280,7 @@ function convertIntegerToBase(value: Decimal, base: number): Decimal[]
  * @param value - The fraction value to convert to the base.
  * @param base - The base.
  * @param maximumLength - The maximum length of the output fraction.
- * @returns A number array of the fraction value in the given base.
+ * @returns A number array of the fraction value in the specified base.
  */
 function convertFractionToBase(value: Decimal, base: number, maximumLength: Decimal): Decimal[]
 {
@@ -381,7 +381,7 @@ export class BaseConverter
 
 
     /**
-     * Calculate the exponent of a given value in the instance base.
+     * Calculate the exponent of a specified value in the instance base.
      * @param value - The value of which to calculate the exponent.
      * @param isEngineering - Whether to use the engineering notation.
      * @returns The exponent.
@@ -401,7 +401,7 @@ export class BaseConverter
     }
 
     /**
-     * Encodes the input number into the instance base.
+     * Encodes the specified number into the instance base.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
      * @returns The encoded number as a {@link NumeralOutput} object.
@@ -543,7 +543,7 @@ export class BaseFormatter
      */
     private readonly reValid: RegExp
     /**
-     * The zero character of the input digits. Becomes a `' '` space character if no digits are specified.
+     * The zero character of the specified digits. Becomes a `' '` space character if no digits are specified.
      */
     private readonly baseZero: string
 
@@ -854,7 +854,7 @@ export class BaseFormatter
     }
 
     /**
-     * Encodes the input number into the instance base, according to the chosen formatting options.
+     * Encodes the specified number into the instance base, according to the chosen formatting options.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
      * @returns the encoded digit.
@@ -958,9 +958,9 @@ export class BaseFormatter
     }
     
     /**
-     * Check if the input value is a number according to the instance base, digits and properties.
+     * Check if the specified value is a number according to the instance base, digits and properties.
      * @param value - A string to check.
-     * @returns Whether the input string is a number.
+     * @returns Whether the specified string is a number.
      * @group Instance Methods
      */
     public isNumber(value: string): boolean
