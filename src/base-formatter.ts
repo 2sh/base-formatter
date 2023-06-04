@@ -9,8 +9,9 @@
 /**
  * A Javascript library for encoding numbers to different radixes/bases with many formatting options.
  * 
- * The `base-formatter` defines the {@link BaseFormatter} and {@link BaseConverter} classes,
- * which is used to create a Base instance for encoding and decoding numbers.
+ * The `base-formatter` defines the {@link BaseFormatter} and {@link BaseConverter} classes.
+ * The {@link BaseFormatter} class is used to base encode a number to a string using specified digits,
+ * and the {@link BaseConverter} to instead encode to a {@link NumeralOutput} object.
  * 
  * @packageDocumentation
  */
