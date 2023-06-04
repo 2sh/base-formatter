@@ -257,6 +257,46 @@ function createPadArray(length: Decimal, character: string): string[]
     return Array(length.toNumber()).fill(character) as string[]
 }
 
+/**
+ * @param value - The integer value to convert.
+ * @param base - The base.
+ * @returns A number array of the integer value in the given base.
+ */
+function convertIntegerToBase(value: Decimal, base: number): Decimal[]
+{
+    const baseVal: Decimal[] = []
+    let index = 0
+    while (value.greaterThanOrEqualTo(base))
+    {
+        baseVal.push(value.modulo(base))
+        value = value.dividedBy(base).floor()
+        index++
+    }
+    if (value.greaterThan(0) || index == 0) baseVal.push(value)
+    return baseVal.reverse()
+}
+
+/**
+ * @param value - The fraction value to convert to the base.
+ * @param base - The base.
+ * @param maximumLength - The maximum length of the output fraction.
+ * @returns A number array of the fraction value in the given base.
+ */
+function convertFractionToBase(value: Decimal, base: number, maximumLength: Decimal): Decimal[]
+{
+    const baseVal: Decimal[] = []
+    const prec = maximumLength.toNumber()
+    for(let i=0; i<prec && !value.isZero(); i++)
+    {
+        value = value.times(base)
+        const baseDigit = value.floor()
+        value = value.minus(baseDigit)
+        baseVal.push(baseDigit)
+    }
+    return baseVal
+}
+
+
 const zero = new Decimal(0)
 
 
@@ -361,45 +401,6 @@ export class BaseConverter
     }
 
     /**
-     * @param value - The integer value to convert to the base.
-     * @returns A number array of the value in the instance base.
-     * @group Instance Methods
-     */
-    private convertIntegerToBase(value: Decimal): Decimal[]
-    {
-        const baseVal: Decimal[] = []
-        let index = 0
-        while (value.greaterThanOrEqualTo(this.base))
-        {
-            baseVal.push(value.modulo(this.base))
-            value = value.dividedBy(this.base).floor()
-            index++
-        }
-        if (value.greaterThan(0) || index == 0) baseVal.push(value)
-        return baseVal.reverse()
-    }
-
-    /**
-     * @param value - The fraction value to convert to the base.
-     * @param precision - The fraction precision, the maximum length of the fraction.
-     * @returns A number array of the value in the instance base.
-     * @group Instance Methods
-     */
-    private convertFractionalToBase(value: Decimal, precision: Decimal): Decimal[]
-    {
-        const baseVal: Decimal[] = []
-        const prec = precision.toNumber()
-        for(let i=0; i<prec && !value.isZero(); i++)
-        {
-            value = value.times(this.base)
-            const baseDigit = value.floor()
-            value = value.minus(baseDigit)
-            baseVal.push(baseDigit)
-        }
-        return baseVal
-    }
-
-    /**
      * Encodes the input number into the instance base.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
@@ -432,8 +433,8 @@ export class BaseConverter
         const intVal = expValue.floor()
         const fractVal = expValue.minus(intVal)
         
-        const baseIntVal = this.convertIntegerToBase(intVal)
-        const baseFractVal = this.convertFractionalToBase(fractVal, maxFractLengthByPrecision)
+        const baseIntVal = convertIntegerToBase(intVal, this.base)
+        const baseFractVal = convertFractionToBase(fractVal, this.base, maxFractLengthByPrecision)
 
         const baseVal: (Decimal|null)[] = [
             ...baseIntVal,
