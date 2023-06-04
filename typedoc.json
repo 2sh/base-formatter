@@ -1,0 +1,21 @@
+{
+    "name": "Base Formatter",
+    "navigation": {
+        "includeCategories": false,
+        "includeGroups": true
+    },
+    "categorizeByGroup": true,
+    "htmlLang": "en",
+    "navigationLinks": {
+        "2sh": "https://2sh.me",
+        "GitHub": "https://github.com/2sh/base-formatter"
+    },
+    "githubPages": true,
+    "searchInComments": true,
+
+    "excludeNotDocumented": true,
+    "excludeInternal": true,
+    "excludeProtected": true,
+    "excludePrivate": true,
+    "excludeReferences": true,
+}

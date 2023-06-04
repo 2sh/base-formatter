@@ -956,8 +956,9 @@ export class BaseFormatter
     }
     
     /**
+     * Check if the input value is a number according to the instance base, digits and properties.
      * @param value - A string to check.
-     * @returns Whether the input string is a number according to the digits and options of the instance.
+     * @returns Whether the input string is a number.
      * @group Instance Methods
      */
     public isNumber(value: string): boolean
@@ -965,5 +966,4 @@ export class BaseFormatter
         return this.reValid.test(value)
     }
 }
-
 export default BaseFormatter
