@@ -1,47 +1,46 @@
-import type { Options, RoundingMode } from '../src/base-formatter'
+import type { BaseFormatterOptions, RoundingMode } from '../src/base-formatter'
 
 import test from 'tape'
 
-import Base from '../src/base-formatter'
+import { BaseFormatter, BaseConverter } from '../src/base-formatter'
 
-const decimal = Base.decimal()
+const decimal = BaseFormatter.decimal()
 
-type FormattingTests = [number, string, Options][]
+type FormattingTests = [number, string, BaseFormatterOptions][]
 const eVal = 1.6021766208e-19
 const testVal2 = 0.123456789
 const testVal3 = 123456789
 const testVal4 = 6789
 
 const formattingTests: FormattingTests = [
-    [eVal, '2e-19', {notation: 'scientific', maximumFractionDigits: 0}],
-    [eVal, '1.6e-19', {notation: 'scientific', maximumFractionDigits: 1}],
-    [eVal, '1.6e-19', {notation: 'scientific', maximumFractionDigits: 2}],
-    [eVal, '1.60e-19', {notation: 'scientific', minimumFractionDigits: 2, maximumFractionDigits: 2}],
-    [eVal, '1.60e-19', {notation: 'scientific', fractionDigits: 2}],
-    [eVal, '1.602e-19', {notation: 'scientific', maximumFractionDigits: 3}],
-    [eVal, '1.6022e-19', {notation: 'scientific', maximumFractionDigits: 4}],
-    [eVal, '1.60218e-19', {notation: 'scientific', maximumFractionDigits: 5}],
-    [eVal, '1.602177E-19', {notation: 'scientific', maximumFractionDigits: 6, scientificNotationCharacter: 'E'}],
-    [testVal2, '0.12346', {maximumFractionDigits: 5}],
-    [testVal2, '0.1235', {maximumFractionDigits: 4}],
-    [testVal2, '0.124', {maximumFractionDigits: 3}],
-    [testVal2, '0.12', {maximumFractionDigits: 2}],
-    [testVal2, '+0.1', {maximumFractionDigits: 1, signDisplay: 'always'}],
-    [testVal2, '0', {maximumFractionDigits: 0}],
-    [testVal2, '1.', {maximumFractionDigits: 0, roundingMode: 'ceil', radixDisplay: 'always'}],
-    [testVal2, '0000.12345678900000', {minimumFractionDigits: 14, minimumIntegerDigits:4}],
-    [testVal2, '   0.123456789     ', {minimumFractionDigits: 14, minimumIntegerDigits:4,
+    [eVal, '2e-19', {notation: 'scientific', maximumFractionLength: 0}],
+    [eVal, '1.6e-19', {notation: 'scientific', maximumFractionLength: 1}],
+    [eVal, '1.6e-19', {notation: 'scientific', maximumFractionLength: 2}],
+    [eVal, '1.60e-19', {notation: 'scientific', minimumFractionLength: 2, maximumFractionLength: 2}],
+    [eVal, '1.602e-19', {notation: 'scientific', maximumFractionLength: 3}],
+    [eVal, '1.6022e-19', {notation: 'scientific', maximumFractionLength: 4}],
+    [eVal, '1.60218e-19', {notation: 'scientific', maximumFractionLength: 5}],
+    [eVal, '1.602177E-19', {notation: 'scientific', maximumFractionLength: 6, scientificNotationCharacter: 'E'}],
+    [testVal2, '0.12346', {maximumFractionLength: 5}],
+    [testVal2, '0.1235', {maximumFractionLength: 4}],
+    [testVal2, '0.124', {maximumFractionLength: 3}],
+    [testVal2, '0.12', {maximumFractionLength: 2}],
+    [testVal2, '+0.1', {maximumFractionLength: 1, signDisplay: 'always'}],
+    [testVal2, '0', {maximumFractionLength: 0}],
+    [testVal2, '1.', {maximumFractionLength: 0, roundingMode: 'ceil', radixDisplay: 'always'}],
+    [testVal2, '0000.12345678900000', {minimumFractionLength: 14, minimumIntegerLength:4}],
+    [testVal2, '   0.123456789     ', {minimumFractionLength: 14, minimumIntegerLength:4,
         integerPadCharacter: ' ', fractionPadCharacter: ' '}],
-    [testVal2, '   0.12345678900000', {minimumFractionDigits: 14, minimumIntegerDigits:4,
+    [testVal2, '   0.12345678900000', {minimumFractionLength: 14, minimumIntegerLength:4,
         integerPadCharacter: ' '}],
-    [testVal2, '0000.123456789     ', {minimumFractionDigits: 14, minimumIntegerDigits:4,
+    [testVal2, '0000.123456789     ', {minimumFractionLength: 14, minimumIntegerLength:4,
         fractionPadCharacter: ' '}],
     [testVal3, '123,456,789', {useGrouping: true}],
     [testVal3, '123,456,789', {useGrouping: 'always'}],
     [testVal3, '1234,56789', {useGrouping: true, groupingLength: 5}],
     [123456.789, '123.456,789', {useGrouping: true, radixCharacter: ',', groupingSeparator: '.'}],
-    [testVal3, '1.2346e8', {notation: 'scientific', maximumFractionDigits: 4}],
-    [testVal3, '123.4568e6', {notation: 'engineering', maximumFractionDigits: 4}],
+    [testVal3, '1.2346e8', {notation: 'scientific', maximumFractionLength: 4}],
+    [testVal3, '123.4568e6', {notation: 'engineering', maximumFractionLength: 4}],
     [3456789, '3-4-5-6,7-8-9', {useGrouping: 'min2', digitSeparator: '-'}],
     [testVal4, '6,789', {useGrouping: true}],
     [testVal4, '6,789', {useGrouping: 'always'}],
@@ -66,23 +65,23 @@ test('formatting', (t) =>
     t.end()
 })
 
-const dozenal = Base.dozenal()
-const domino = Base.domino()
-const base120Numerals = new Base(120)
+const dozenal = BaseFormatter.dozenal()
+const domino = BaseFormatter.domino()
+const base120Numerals = new BaseConverter(120)
 
 const complexInput = 346355345633
-const complexOutput = base120Numerals.encode(complexInput, {notation: 'scientific', maximumFractionDigits: 8})
+const complexOutput = base120Numerals.encode(complexInput, {notation: 'scientific', maximumFractionLength: 8})
 
 test('encoding', (t) =>
 {
     t.equal(dozenal.encode(51240, {radixDisplay: 'always'}), '257↊0;')
-    t.equal(dozenal.encode(51240.45345, {maximumFractionDigits: 2}), '257↊0;55')
+    t.equal(dozenal.encode(51240.45345, {maximumFractionLength: 2}), '257↊0;55')
     t.equal(dozenal.encode(144.5), '100;6')
     t.equal(dozenal.encode(288.25, {signDisplay: 'always'}), '+200;3')
     t.equal(dozenal.encode(143.75), '↋↋;9')
-    t.equal(dozenal.encode(51240.3333333333, {maximumFractionDigits: 8}), '257↊0;4')
-    t.equal(dozenal.encode(51240.6666666666, {maximumFractionDigits: 8}), '257↊0;8')
-    t.equal(domino.encode(51234.2345334554, {maximumFractionDigits: 2}), '🁨🁵🁕🁢🀹🁠')
+    t.equal(dozenal.encode(51240.3333333333, {maximumFractionLength: 8}), '257↊0;4')
+    t.equal(dozenal.encode(51240.6666666666, {maximumFractionLength: 8}), '257↊0;8')
+    t.equal(domino.encode(51234.2345334554, {maximumFractionLength: 2}), '🁨🁵🁕🁢🀹🁠')
     t.deepEqual(base120Numerals.encode(-1440.5), {isNegative: true, integer: [12, 0], fraction: [60], exponent: 0})
     t.deepEqual(complexOutput, {isNegative: false, integer: [ 13 ], fraction: [ 110, 37, 14, 66, 113 ], exponent: 5})
 
@@ -99,7 +98,7 @@ test('decoding', (t) =>
     t.end()
 })
 
-const decimalWithSep = Base.decimal({digitSeparator: '-'})
+const decimalWithSep = BaseFormatter.decimal({digitSeparator: '-'})
 
 test('isNumber', (t) =>
 {
@@ -147,14 +146,14 @@ test('rounding modes', (t) =>
     {
         testNumbers1.forEach((n, i) =>
         {
-            t.equal(decimal.encode(n, {roundingMode, fractionDigits: 0}), expectedResults[i])
+            t.equal(decimal.encode(n, {roundingMode, minimumFractionLength: 0, maximumFractionLength: 0}), expectedResults[i])
         })
     })
     roundingModesExpected2.forEach(([roundingMode, expectedResults]) =>
     {
         testNumbers2.forEach((n, i) =>
         {
-            t.equal(decimal.encode(n, {roundingMode, fractionDigits: 0}), expectedResults[i])
+            t.equal(decimal.encode(n, {roundingMode, minimumFractionLength: 0, maximumFractionLength: 0}), expectedResults[i])
         })
     })
     t.end()

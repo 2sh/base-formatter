@@ -5,11 +5,11 @@ The encoder takes various options to adjust the formatting of the output base nu
 
 ## Use
 ```js
-import Base from 'base-formatter'
+import { BaseFormatter, BaseConverter } from 'base-formatter'
 
-const base16Greek = new Base('0123456789ΑΒΓΔΕΖ', {radixCharacter: ','})
-// or for just the A-F characters, Base.hexadecimal({...})
-const dozenal = Base.dozenal()
+const base16Greek = new BaseFormatter('0123456789ΑΒΓΔΕΖ', {radixCharacter: ','})
+// or for just the A-F characters, BaseFormatter.hexadecimal({...})
+const dozenal = BaseFormatter.dozenal()
 
 dozenal.encode(142) // '↋↊'
 dozenal.encode(144) // '100'
@@ -23,7 +23,7 @@ dozenal.decode('↊;9429e↊') // 667430129664
 dozenal.isNumber('↊;9429e↊') // true
 
 // Making use of numeral outputs:
-const base120 = new Base(120)
+const base120 = new BaseConverter(120)
 base120.encode(-1440)
 // { isNegative: true, integer: [ 12, 0 ], fraction: [], exponent: 0 }
 base120.encode(6347544.3456, {notation: 'scientific', maximumFractionDigits: 5})
