@@ -1,10 +1,5 @@
 {
     "name": "Base Formatter",
-    "navigation": {
-        "includeCategories": false,
-        "includeGroups": true
-    },
-    "categorizeByGroup": true,
     "htmlLang": "en",
     "navigationLinks": {
         "2sh": "https://2sh.me",
