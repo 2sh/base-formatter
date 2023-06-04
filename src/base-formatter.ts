@@ -495,7 +495,8 @@ export class BaseConverter
     }
 
     /**
-     * @param encodedValue - An encoded number in the instance base.
+     * Decode an en encoded number.
+     * @param encodedValue - An encoded number as a {@link NumeralOutput} object in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
      * @returns The decoded number.
      * @group Instance Methods
@@ -911,7 +912,8 @@ export class BaseFormatter
 
 
     /**
-     * @param encodedValue - An encoded number in the instance base.
+     * Decode an en encoded number.
+     * @param encodedValue - An encoded number as a string in the instance base.
      * @param options - The options to use if, e.g. alternative characters were used.
      * @returns The decoded number.
      * @throws {@link DigitNotFound} when the specified string contains unknown characters.
