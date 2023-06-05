@@ -1,8 +1,8 @@
 # Base Formatter
-A Javascript library for encoding numbers to any radix/base with many formatting options.
+A Javascript library for encoding numbers to any base with various formatting options.
 
 ## Features
-- Encode and decode between any bases.
+- Encode and decode to and from any radix/base.
 - Use specified symbols (digits, sign, radix character, padding, separators) to represent the encoded number.
 - Adjust integer and fractions lengths.
 - Adding "thousands" grouping separators, grouping at adjustable lengths.
