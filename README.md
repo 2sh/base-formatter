@@ -13,7 +13,7 @@ A Javascript library for encoding numbers to any radix/base with many formatting
 
 ## Documentation
 - The API reference can be found [here](https://2sh.github.io/base-formatter/modules.html).
-  - [BaseFormatter](https://2sh.github.io/base-formatter/classes/BaseFormatter.html) - Makes use of specified symbols, formatting options to represent numbers in different bases.
+  - [BaseFormatter](https://2sh.github.io/base-formatter/classes/BaseFormatter.html) - Makes use of specified symbols and formatting options to represent numbers in different bases.
   - [BaseConverter](https://2sh.github.io/base-formatter/classes/BaseConverter.html) - Alternatively represents numbers in different bases as numberal objects.
 
 ## Examples
