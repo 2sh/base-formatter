@@ -401,9 +401,9 @@ export class BaseConverter
     }
 
     /**
-     * Encodes the specified number into the instance base.
+     * Encodes the specified number according to the instance base and properties.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
-     * @param options - The options to use for formatting.
+     * @param options - The options to use as conversion rules.
      * @returns The encoded number as a {@link NumeralOutput} object.
      * @group Instance Methods
      */
@@ -497,9 +497,9 @@ export class BaseConverter
     }
 
     /**
-     * Decode an en encoded number.
+     * Decode an encoded number.
      * @param encodedValue - An encoded number as a {@link NumeralOutput} object in the instance base.
-     * @param options - The options to use if, e.g. alternative characters were used.
+     * @param options - The options to use if, for example, alternative characters were specified during encoding.
      * @returns The decoded number.
      * @group Instance Methods
      */
@@ -549,7 +549,7 @@ export class BaseFormatter
 
     /**
      * The constructor of the BaseFormatter class.
-     * @param digits - A string of digits, the length of which determining the base number.
+     * @param digits - A string of symbols for representing the digits, the length of which determining the base number.
      * @param options - Optional parameters, for adjusting conversion rules and the encoding output string formatting.
      */
     constructor(digits: string | string [], options: BaseFormatterOptions = {})
@@ -854,10 +854,10 @@ export class BaseFormatter
     }
 
     /**
-     * Encodes the specified number into the instance base, according to the chosen formatting options.
+     * Encodes the specified number according to the instance base and specified digits and properties.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
-     * @returns the encoded digit.
+     * @returns the encoded number as a string.
      * @group Instance Methods
      */
     public encode(numberValue: number | string | Decimal, options?: BaseFormatterOptions): string
@@ -914,9 +914,9 @@ export class BaseFormatter
 
 
     /**
-     * Decode an en encoded number.
+     * Decode an en encoded number according to the instance base and specified digits and properties.
      * @param encodedValue - An encoded number as a string in the instance base.
-     * @param options - The options to use if, e.g. alternative characters were used.
+     * @param options - The options to use if, for example, alternative characters were specified during encoding.
      * @returns The decoded number.
      * @throws {@link DigitNotFound} when the specified string contains unknown characters.
      * @group Instance Methods
@@ -958,7 +958,7 @@ export class BaseFormatter
     }
     
     /**
-     * Check if the specified value is a number according to the instance base, digits and properties.
+     * Check if the specified value is a number according to the instance base and specified digits and properties.
      * @param value - A string to check.
      * @returns Whether the specified string is a number.
      * @group Instance Methods
