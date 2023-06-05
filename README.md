@@ -1,11 +1,22 @@
 # Base Formatter
-A Javascript library for encoding numbers to different radixes/bases with many formatting options.
+A Javascript library for encoding numbers to any radix/base with many formatting options.
 
-The encoder takes various options to adjust the formatting of the output base number as a string, such as the characters to use for the various symbols (radix character, signs, separators), integer and fraction lengths, padding, grouping, scientific and engineering notation and rounding mode. The base can be any number as long as the digits are specified: 0123456789ABCD...
+## Features
+- Encode and decode between any bases.
+- Use specified symbols (digits, sign, radix character, padding, separators) to represent the encoded number.
+- Adjust integer and fractions lengths.
+- Adding "thousands" grouping separators, grouping at adjustable lengths.
+- A choice of various rounding modes.
+- Scientific and engineering notation.
+- Alternatively output as a numeral object, to represent numbers in bases without the use of digit symbols.
+- Encoding of decimal.js values for more precision.
 
-[Documentation](https://2sh.github.io/base-formatter/modules.html)
+## Documentation
+- The API reference can be found [here](https://2sh.github.io/base-formatter/modules.html).
+  - [BaseFormatter](https://2sh.github.io/base-formatter/classes/BaseFormatter.html) - Makes use of specified symbols, formatting options to represent numbers in different bases.
+  - [BaseConverter](https://2sh.github.io/base-formatter/classes/BaseConverter.html) - Alternatively represents numbers in different bases as numberal objects.
 
-## Use
+## Examples
 ```js
 import { BaseFormatter, BaseConverter } from 'base-formatter'
 
@@ -33,4 +44,3 @@ base120.encode(6347544.3456, {notation: 'scientific', maximumFractionDigits: 5})
 base120.decode({ isNegative: false, integer: [ 3 ], fraction: [ 80, 96, 24, 41, 57 ], exponent: 3 })
 // 6347544.345625
 ```
-(decimal.js values can also be encoded for more precision.)
