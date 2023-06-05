@@ -8,8 +8,10 @@
     "searchInComments": true,
 
     "excludeNotDocumented": true,
-    "excludeInternal": true,
     "excludeProtected": true,
     "excludePrivate": true,
     "excludeReferences": true,
+    "visibilityFilters": {
+        "@internal": false
+    }
 }

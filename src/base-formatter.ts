@@ -9,9 +9,9 @@
 /**
  * A Javascript library for encoding numbers to different radixes/bases with many formatting options.
  * 
- * The `base-formatter` defines the {@link BaseFormatter} and {@link BaseConverter} classes.
- * The {@link BaseFormatter} class is used to base encode a number to a string using specified digits,
- * and the {@link BaseConverter} to instead encode to a {@link NumeralOutput} object.
+ * The `base-formatter` defines the {@link BaseFormatter | `BaseFormatter`} and {@link BaseConverter | `BaseConverter`} classes.
+ * The {@link BaseFormatter | `BaseFormatter`} class is used to base encode a number to a string using specified digits,
+ * and the {@link BaseConverter | `BaseConverter`} to instead encode to a {@link NumeralOutput | `NumeralOutput`} object.
  * 
  * @packageDocumentation
  */
@@ -101,90 +101,88 @@ export type UseGrouping =
     | 'min2'
 
 /**
- * The properties of the {@link BaseConverter} class.
+ * The options passed to {@link BaseConverter | `BaseConverter`} and {@link BaseConverter.encode | `BaseConverter.encode`}.
  */
-export interface BaseConverterProperties
+export interface BaseConverterOptions
 {
     /**
      * How numbers are to be rounded.
      * @defaultValue `'halfExpand'`
      */
-    roundingMode: RoundingMode
+    roundingMode?: RoundingMode
     /**
      * The precision of the number, the number of significant digits.
      * @defaultValue `32`
      */
-    precision: number
+    precision?: number
     /**
      * The maximum fraction length.
      * By default, the maximum fraction length is determined by the precision.
      * @defaultValue `null`
      */
-    maximumFractionLength: number | null
+    maximumFractionLength?: number | null
     /**
      * The formatting that should be displayed for the number.
      * @defaultValue `'standard'`
      */
-    notation: Notation
+    notation?: Notation
 }
-/**
- * The options passed to {@link BaseConverter} and {@link BaseConverter.encode}.
- */
-export type BaseConverterOptions = Partial<BaseConverterProperties>
+type BaseConverterProperties = Required<BaseConverterOptions>
 
 /**
- * The properties of the {@link BaseFormatter} class.
+ * The options specifically to the {@link BaseFormatter | `BaseFormatter`} class.
+ * @internal
  */
-export interface BaseFormatterProperties
+export interface BaseFormatterOnlyOptions
 {
     /**
      * The radix character, or "decimal" point/mark/separator, such as the point in `0.5`).
      * @defaultValue `'.'`
      */
-    radixCharacter: string
+    radixCharacter?: string
     /**
      * The negative sign.
      * @defaultValue `'-'`
      */
-    negativeSign: string
+    negativeSign?: string
     /**
      * The positive sign.
      * @defaultValue `'+'`
      */
-    positiveSign: string
+    positiveSign?: string
     /**
      * The grouping separator, such as the commas in `100,000,000`.
      * @defaultValue `','`
      */
-    groupingSeparator: string
+    groupingSeparator?: string
     /**
      * The grouping length, the distance between grouping separators, e.g. with a length of 2: `1,00,00,00`.
      * @defaultValue `3`
      */
-    groupingLength: number
+    groupingLength?: number
     /**
      * The digit separator, if specified, will be places between every digit without a grouping separator.
      * @defaultValue `''`
      */
-    digitSeparator: string
+    digitSeparator?: string
     /**
      * The scientific notation character, such as the `e` in `1.342e3`.
      * @defaultValue `'e'`
      */
-    scientificNotationCharacter: string
+    scientificNotationCharacter?: string
     /**
      * The integer pad character, padding the left side of the integer.
      * By default the specified digit for zero is used,
      * but could also be a `' '` space char for example.
      * @defaultValue `null`
      */
-    integerPadCharacter: string | null // the digit zero char if not string
+    integerPadCharacter?: string | null // the digit zero char if not string
     /**
      * The fraction pad character, padding the right side of the fraction.
      * By default the specified digit for zero is used, but could also be a `' '` space char for example.
      * @defaultValue `null`
      */
-    fractionPadCharacter: string | null
+    fractionPadCharacter?: string | null
 
     /**
      * The minimum fraction.
@@ -192,38 +190,40 @@ export interface BaseFormatterProperties
      * right-padded with zeros.
      * @defaultValue `0`
      */
-    minimumFractionLength: number
+    minimumFractionLength?: number
     /**
      * The minimum integer length.
      * A value with a smaller number of integer digits than this number will be
      * left-padded with zeros or the specified integer pad character.
      * @defaultValue `0`
      */
-    minimumIntegerLength: number
+    minimumIntegerLength?: number
     /**
      * When to display the radix character.
      * @defaultValue `'auto'`
      */
-    radixDisplay: RadixDisplay
+    radixDisplay?: RadixDisplay
     /**
      * When to display the sign.
      * @defaultValue `'auto'`
      */
-    signDisplay: SignDisplay
+    signDisplay?: SignDisplay
     /**
      * When numbers are to be grouped.
      * @defaultValue `false`
      */
-    useGrouping: UseGrouping
+    useGrouping?: UseGrouping
 }
-/**
- * The options passed to {@link BaseFormatter}, {@link BaseFormatter.encode} and {@link BaseFormatter.decode}.
- * It includes the options for the BaseConverter.
- */
-export type BaseFormatterOptions = Partial<BaseFormatterProperties> & BaseConverterOptions
+type BaseFormatterProperties = Required<BaseFormatterOnlyOptions>
 
 /**
- * The numeral output of the {@link BaseConverter.encode} method.
+ * The options passed to {@link BaseFormatter | `BaseFormatter`}, {@link BaseFormatter.encode | `BaseFormatter.encode`} and {@link BaseFormatter.decode | `BaseFormatter.decode`}.
+ * It includes the options for the {@link BaseConverter | `BaseConverter`}.
+ */
+export interface BaseFormatterOptions extends BaseConverterOptions, BaseFormatterOnlyOptions {}
+
+/**
+ * The numeral output of the {@link BaseConverter.encode | `BaseConverter.encode`} method.
  */
 export interface NumeralOutput
 {
@@ -296,12 +296,11 @@ function convertFractionToBase(value: Decimal, base: number, maximumLength: Deci
     return baseVal
 }
 
-
 const zero = new Decimal(0)
 
 
 /**
- * The class from which to create a BaseConverter instance for encoding to the {@link NumeralOutput}.
+ * The class from which to create a `BaseConverter` instance for encoding to the {@link NumeralOutput | `NumeralOutput`}.
  */
 export class BaseConverter
 {
@@ -314,22 +313,22 @@ export class BaseConverter
      */
     public readonly properties: BaseConverterProperties
     /**
-     * The rounding modes used by the {@link encode} method.
+     * The rounding modes used by the {@link encode | `encode`} method.
      */
     private readonly roundingModes: {
         [mode in RoundingMode]: (value: Decimal, isNegative: boolean, index: number, values: (Decimal | null)[]) => boolean
     }
     /**
-     * The natural logarithm of the base used by the {@link calculateExponent} method.
+     * The natural logarithm of the base used by the {@link calculateExponent | `calculateExponent`} method.
      */
     private readonly lnBase: Decimal
     /**
-     * The natural logarithm of base*10^3 used by the {@link calculateExponent} method.
+     * The natural logarithm of base*10^3 used by the {@link calculateExponent | `calculateExponent`} method.
      */
     private readonly lnBase3: Decimal
 
     /**
-     * The constructor of the BaseConverter class.
+     * The constructor of the `BaseConverter` class.
      * @param base - The base number.
      * @param options - Optional parameters, for adjusting conversion rules.
      */
@@ -404,7 +403,7 @@ export class BaseConverter
      * Encodes the specified number according to the instance base and properties.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use as conversion rules.
-     * @returns The encoded number as a {@link NumeralOutput} object.
+     * @returns The encoded number as a {@link NumeralOutput | `NumeralOutput`} object.
      * @group Instance Methods
      */
     public encode(numberValue: number | string | Decimal, options?: BaseConverterOptions): NumeralOutput
@@ -498,7 +497,7 @@ export class BaseConverter
 
     /**
      * Decode an encoded number.
-     * @param encodedValue - An encoded number as a {@link NumeralOutput} object in the instance base.
+     * @param encodedValue - An encoded number as a {@link NumeralOutput | `NumeralOutput`} object in the instance base.
      * @param options - The options to use if, for example, alternative characters were specified during encoding.
      * @returns The decoded number.
      * @group Instance Methods
@@ -518,12 +517,12 @@ const asciiLowercase = 'abcdefghijklmnopqrstuvwxyz'
 const allDigits = numbers + asciiUppercase + asciiLowercase
 
 /**
- * The class from which to create a BaseFormatter instance for encoding to a string format from specified digits.
+ * The class from which to create a `BaseFormatter` instance for encoding to a string format from specified digits.
  */
 export class BaseFormatter
 {
     /**
-     * Internally used BaseConverter instance.
+     * Internally used {@link BaseConverter | `BaseConverter`} instance.
      */
     private baseConverter: BaseConverter
     /**
@@ -539,7 +538,7 @@ export class BaseFormatter
      */
     public readonly properties: BaseFormatterProperties
     /**
-     * The RegExp object used by the {@link isNumber} method.
+     * The RegExp object used by the {@link isNumber | `isNumber`} method.
      */
     private readonly reValid: RegExp
     /**
@@ -548,7 +547,7 @@ export class BaseFormatter
     private readonly baseZero: string
 
     /**
-     * The constructor of the BaseFormatter class.
+     * The constructor of the `BaseFormatter` class.
      * @param digits - A string of symbols for representing the digits, the length of which determining the base number.
      * @param options - Optional parameters, for adjusting conversion rules and the encoding output string formatting.
      */
@@ -613,11 +612,11 @@ export class BaseFormatter
 
     /**
      * This method will take the base number, slice a string of digits 0-9A-Za-z to a length equal to the base number
-     * and return an instance of the {@link BaseFormatter} class with the sliced string as the digits.
+     * and return an instance of the {@link BaseFormatter | `BaseFormatter`} class with the sliced string as the digits.
      * @param base - The base number to use, a maximum of `62`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
-     * @throws {@link MaximumBaseExceeded} when the base number exceeds the maximum amount of this method.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
+     * @throws {@link MaximumBaseExceeded | `MaximumBaseExceeded`} when the base number exceeds the maximum amount of this method.
      * @group Static Methods
      */
     public static byBase(base: number, options?: BaseFormatterOptions)
@@ -627,79 +626,79 @@ export class BaseFormatter
     }
 
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 2 with the digits `'01'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 2 with the digits `'01'`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static binary(options?: BaseFormatterOptions) { return BaseFormatter.byBase(2, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 8 with the digits `'01234567'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 8 with the digits `'01234567'`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static octal(options?: BaseFormatterOptions) { return BaseFormatter.byBase(8, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 10 with the digits `'0123456789'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 10 with the digits `'0123456789'`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static decimal(options?: BaseFormatterOptions) { return BaseFormatter.byBase(10, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 16 with the digits `'0123456789ABCDEF'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 16 with the digits `'0123456789ABCDEF'`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static hexadecimal(options?: BaseFormatterOptions) { return BaseFormatter.byBase(16, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 12 with the digits `'0123456789↊↋'` and the radix character of `';'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 12 with the digits `'0123456789↊↋'` and the radix character of `';'`.
      * The digits ↊ and ↋ as used by the Dozenal Societies of America and Great Britain.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static dozenal(options?: BaseFormatterOptions)
         { return new BaseFormatter(numbers + '↊↋', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
-     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link BaseFormatter.dozenal} method in case a font doesn't have them.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 12 with the digits `'0123456789TE'` and the radix character of `';'`.
+     * The digits T and E are the ASCII variations of the digits ↊ and ↋ used by the {@link BaseFormatter.dozenal | `BaseFormatter.dozenal`} method in case a font doesn't have them.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static dozenalInitials(options?: BaseFormatterOptions)
         { return new BaseFormatter(numbers + 'TE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 12 with the digits `'0123456789XE'` and the radix character of `';'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 12 with the digits `'0123456789XE'` and the radix character of `';'`.
      * Uses a variant of the digit for 10 using the Roman numeral X.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static dozenalRoman(options?: BaseFormatterOptions)
         { return new BaseFormatter(numbers + 'XE', {radixCharacter: ';', ...options}) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 12 with the digits `'0123456789AB'`.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 12 with the digits `'0123456789AB'`.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static duodecimal(options?: BaseFormatterOptions) { return BaseFormatter.byBase(12, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 20 with the digits `'0123456789ABCDEFGHJK'`,
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 20 with the digits `'0123456789ABCDEFGHJK'`,
      * skipping over I in order to avoid confusion between I and 1.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static vigesimal(options?: BaseFormatterOptions) { return new BaseFormatter(numbers + "ABCDEFGHJK", options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 57 with the digits 0-9A-Ba-b without the characters Il1O0.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static base57(options?: BaseFormatterOptions)
@@ -713,9 +712,9 @@ export class BaseFormatter
         return new BaseFormatter(digits, options)
     }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 58 with the digits 0-9A-Ba-b without the characters IlO0.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static base58(options?: BaseFormatterOptions)
@@ -728,9 +727,9 @@ export class BaseFormatter
         return new BaseFormatter(digits, options)
     }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 60 with the digits 0-9A-Ba-b without the characters l0.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 60 with the digits 0-9A-Ba-b without the characters l0.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static sexagesimal(options?: BaseFormatterOptions)
@@ -741,9 +740,9 @@ export class BaseFormatter
         return new BaseFormatter(digits, options)
     }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 60 using cuneiform digits.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 60 using cuneiform digits.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static cuneiform(options?: BaseFormatterOptions)
@@ -761,16 +760,16 @@ export class BaseFormatter
         })
     }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 62 with the digits 0-9A-Ba-b.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 62 with the digits 0-9A-Ba-b.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static base62(options?: BaseFormatterOptions) { return BaseFormatter.byBase(62, options) }
     /**
-     * This method returns an instance of the {@link BaseFormatter} class in base 98 using Unicode domino tiles.
+     * This method returns an instance of the {@link BaseFormatter | `BaseFormatter`} class in base 98 using Unicode domino tiles.
      * @param options - The options to use.
-     * @returns An instance of the {@link BaseFormatter} class.
+     * @returns An instance of the {@link BaseFormatter | `BaseFormatter`} class.
      * @group Static Methods
      */
     public static domino(options?: BaseFormatterOptions)
@@ -830,7 +829,7 @@ export class BaseFormatter
      * Encode a single digit.
      * @param value - The number to convert.
      * @returns The encoded digit.
-     * @throws {@link DigitNotFound} when no digit could be found for the specified number.
+     * @throws {@link DigitNotFound | `DigitNotFound`} when no digit could be found for the specified number.
      * @group Instance Methods
      */
     private encodeDigit(value: number): string
@@ -843,7 +842,7 @@ export class BaseFormatter
      * Decode a single digit.
      * @param value - The digit to convert to a number.
      * @returns The decoded digit.
-     * @throws {@link DigitNotFound} when the string is not found in the digits.
+     * @throws {@link DigitNotFound | `DigitNotFound`} when the string is not found in the digits.
      * @group Instance Methods
      */
     private decodeDigit(value: string): number
@@ -918,7 +917,7 @@ export class BaseFormatter
      * @param encodedValue - An encoded number as a string in the instance base.
      * @param options - The options to use if, for example, alternative characters were specified during encoding.
      * @returns The decoded number.
-     * @throws {@link DigitNotFound} when the specified string contains unknown characters.
+     * @throws {@link DigitNotFound | `DigitNotFound`} when the specified string contains unknown characters.
      * @group Instance Methods
      */
     public decode(encodedValue: string, options?: BaseFormatterOptions): number
