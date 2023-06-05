@@ -2,7 +2,8 @@ name: Build and deploy docs directly to Pages
 
 on:
   push:
-    branches: ["master"]
+    branches:
+      - 'master'
     paths:
       - 'src/**'
 
