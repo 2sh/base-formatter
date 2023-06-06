@@ -3,7 +3,6 @@
     {
         "target": "ES2021",
         "moduleResolution": "nodenext",
-        "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
         "listEmittedFiles": true
