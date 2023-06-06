@@ -16,10 +16,34 @@ A Javascript library for encoding numbers to any base with various formatting op
   - [`BaseFormatter`](https://2sh.github.io/base-formatter/classes/BaseFormatter.html) - Makes use of specified symbols and formatting options to represent the numbers.
   - [`BaseConverter`](https://2sh.github.io/base-formatter/classes/BaseConverter.html) - Alternatively represents numbers as numberal objects.
 
-## Examples
-```js
-import { BaseFormatter, BaseConverter } from 'base-formatter'
+## Installation
+- Yarn
+  ```
+  yarn add base-formatter
+  ```
 
+- NPM
+  ```
+  npm install base-formatter
+  ```
+
+## Usage
+
+### Importing
+
+- ES module
+  ```js
+  import { BaseFormatter, BaseConverter } from 'base-formatter'
+  // For just the BaseFormatter, simply:
+  import BaseFormatter from 'base-formatter'
+  ```
+- CommonJS
+  ```js
+  const { BaseFormatter, BaseConverter } = require('base-formatter')
+  ```
+
+### Examples
+```js
 const base16Greek = new BaseFormatter('0123456789ΑΒΓΔΕΖ', {radixCharacter: ','})
 // or for just the A-F characters, BaseFormatter.hexadecimal({...})
 const dozenal = BaseFormatter.dozenal()
