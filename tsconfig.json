@@ -8,12 +8,5 @@
     "esModuleInterop": true,
     "outDir": "./dist"
   },
-  "typedocOptions": {
-    "entryPoints": [
-      "src/base-formatter.ts"
-    ],
-    "out": "docs"
-  },
   "include": ["src/**/*.ts"]
 }
-  
