@@ -1,7 +1,7 @@
 {
   "name": "base-formatter",
   "description": "Encoding to and decoding from any base",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MPL-2.0",
   "author": {
     "name": "2sh",
@@ -26,21 +26,33 @@
     "type": "git",
     "url": "https://github.com/2sh/base-formatter.git"
   },
-  "main": "dist/base-formatter.js",
-  "types": "dist/base-formatter.d.ts",
+  "type": "commonjs",
+  "main": "./dist/cjs/base-formatter.js",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/base-formatter.js",
+      "import": "./dist/esm/base-formatter.js",
+      "types": "./dist/types/base-formatter.d.ts",
+      "default": "./dist/cjs/base-formatter.js"
+    }
+  },
   "files": [
     "/dist"
   ],
   "scripts": {
-    "build": "tsc --listEmittedFiles",
-    "demo": "ts-node test/demo.ts",
+    "build": "yarn run clean && yarn run build:esm && yarn run build:cjs && yarn run build:types",
+    "clean": "rm -rf ./dist",
+    "build:esm": "tsc --project tsconfig.esm.json && echo '{\"type\": \"module\"}' > dist/esm/package.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
+    "build:types": "tsc --project tsconfig.types.json",
+    "prepublishOnly": "yarn test && yarn run build",
     "test": "ts-node test/tests.ts",
-    "lint": "eslint src test",
-    "docs": "typedoc"
+    "lint": "eslint -c config/eslintrc.json src test",
+    "docs": "typedoc",
+    "demo": "ts-node test/demo.ts"
   },
   "dependencies": {
-    "decimal.js": "^10.4.3",
-    "typescript": "^5.0.4"
+    "decimal.js": "^10.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.2.5",
@@ -50,6 +62,7 @@
     "eslint": "^8.42.0",
     "tape": "^5.6.3",
     "ts-node": "^10.9.1",
-    "typedoc": "^0.24.7"
+    "typedoc": "^0.24.7",
+    "typescript": "^5.0.4"
   }
 }
