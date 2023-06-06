@@ -28,6 +28,8 @@
   },
   "type": "commonjs",
   "main": "./dist/cjs/base-formatter.js",
+  "module": "./dist/esm/base-formatter.js",
+  "types": "./dist/types/base-formatter.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/base-formatter.d.ts",
