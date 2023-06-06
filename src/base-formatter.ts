@@ -480,8 +480,8 @@ export class BaseConverter
         if (isRemainder) baseVal.unshift(new Decimal(1))
         
         const nullPos = baseVal.findIndex(e => e == null)
-        const roundedIntVal = baseVal.slice(0, nullPos) as Decimal[]
-        const roundedFractVal = baseVal.slice(nullPos+1) as Decimal[]
+        const roundedIntVal = baseVal.slice(0, nullPos)
+        const roundedFractVal = baseVal.slice(nullPos+1)
 
         // if the value became zero through rounding, make no longer negative
         if (!decVal.isZero() && baseVal.every((v) => v === null || v.isZero()))

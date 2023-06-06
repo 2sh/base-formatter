@@ -9,7 +9,7 @@
         "@typescript-eslint"
     ],
     "parserOptions": {
-        "project": "./tsconfig.eslint.json"
+        "project": "tsconfig.eslint.json"
     },
     "root": true,
     "env": {

@@ -30,9 +30,9 @@
   "main": "./dist/cjs/base-formatter.js",
   "exports": {
     ".": {
+      "types": "./dist/types/base-formatter.d.ts",
       "require": "./dist/cjs/base-formatter.js",
       "import": "./dist/esm/base-formatter.js",
-      "types": "./dist/types/base-formatter.d.ts",
       "default": "./dist/cjs/base-formatter.js"
     }
   },
