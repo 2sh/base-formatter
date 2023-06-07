@@ -21,7 +21,6 @@ A Javascript library for encoding numbers to any base with various formatting op
   ```
   yarn add base-formatter
   ```
-
 - NPM
   ```
   npm install base-formatter
