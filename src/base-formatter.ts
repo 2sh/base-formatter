@@ -16,12 +16,6 @@
  * @packageDocumentation
  */
 
-import type dayjs from 'dayjs'
-import type {} from 'dayjs/plugin/dayOfYear'
-import type {} from 'dayjs/plugin/weekOfYear'
-import type {} from 'dayjs/plugin/utc'
-import type {} from 'dayjs/plugin/timezone'
-
 import { Decimal } from 'decimal.js'
 
 // Basing options on:
@@ -242,39 +236,37 @@ function convertFractionToBase(value: Decimal, base: number, maximumLength: Deci
 
 const zero = new Decimal(0)
 
-const dateTimeTokenFunctions: {[token: string]: (dateTime: dayjs.Dayjs, length: number) => number | string } =
+const dateTimeTokens = [
+    "Y", "y",
+    "M", "m",
+    "D", "d",
+    "W", "w",
+    "v",
+    "j",
+    "H", "h", "K", "k",
+    "i",
+    "s",
+    "S",
+    "A", "a",
+    "Z", "T",
+    "z",
+    "Q",
+    "u"
+
+] as const
+type DateTimeToken = typeof dateTimeTokens[number]
+
+const reDateTimeToken = new RegExp('\\[.+?\\]|' + dateTimeTokens.map(l => l + '+').join('|'), 'g')
+
+const getTimezoneOffset = (date: Date, timeZone: string) =>
 {
-    Y: d => d.year(),
-    y: d => d.year(),
-    M: d => d.month()+1,
-    m: (d, l) => d.format('M'.repeat(Math.min(l+2, 4))),
-    D: d => d.date(),
-    d: d => d.dayOfYear(),
-    W: d => d.day() + 1,
-    w: d => d.day(),
-    v: (d, l) => d.format('d'.repeat(Math.min(l+1, 4))),
-    j: d => d.week(),
-
-    H: d => d.hour(),
-    h: d => (d.hour() % 12) || 12,
-    K: d => d.hour() || 24,
-    k: d => d.hour() % 12,
-    i: d => d.minute(),
-    s: d => d.second(),
-    S: d => d.millisecond(),
-    A: d => d.hour() < 12 ? 'AM' : 'PM',
-    a: d => d.hour() < 12 ? 'am' : 'pm',
-    
-    Z: d => Math.trunc(d.utcOffset() / 60),
-    T: d => Math.abs(d.utcOffset()) % 60,
-
-    z: (d, l) => d.offsetName(l === 1 ? 'short' : 'long'),
-
-    Q: d => Math.floor(d.month()/4)+1,
-
-    u: d => d.unix()
+    const tzDate = new Date(date.toLocaleString('en-US', { timeZone }))
+    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }))
+    return (tzDate.getTime() - utcDate.getTime()) / 6e4
 }
-const reDateTimeToken = new RegExp('\\[.+?\\]|' + Object.keys(dateTimeTokenFunctions).map(l => l + '+').join('|'), 'g')
+
+const toRepValue = (length: number) => (['narrow', 'short', 'long'] as const)[Math.min(2, length-1)]
+
 
 
 /**
@@ -1038,8 +1030,56 @@ export class BaseFormatter
      * dozenal.encodedDateTime(dayjs('2023-12-25'), 'YYYY-MM-DD') // Returns: '1207-10-21'
      * @group Instance Methods
      */
-    public encodeDateTime(dateTime: dayjs.Dayjs, format: string, options?: BaseFormatterOptions)
+    public encodeDateTime(dateTime: number | Date, format: string, options?: BaseFormatterOptions)
     {
+        const inputTimeZone = undefined
+        const inputLocale = undefined
+
+        const formatting = Intl.DateTimeFormat(inputLocale, { timeZone: inputTimeZone })
+        const { timeZone, locale } = formatting.resolvedOptions()
+        
+        const ud = typeof dateTime === 'number'
+            ? new Date(dateTime) : dateTime
+
+        const utcOffset = timeZone
+            ? getTimezoneOffset(ud, timeZone)
+            : ud.getTimezoneOffset()
+        
+        const d = new Date(ud.getTime() + utcOffset*6e4)
+
+        const dateTimeTokenFunctions: {[token in DateTimeToken]: (length: number) => number | string } =
+        {
+            Y: l => d.getUTCFullYear(),
+            y: l => d.getUTCFullYear(),
+            M: l => d.getUTCMonth()+1,
+            m: l => ud.toLocaleString(locale, {timeZone, month: toRepValue(l)}),
+            D: l => d.getUTCDate(),
+            d: l => d.dayOfYear(),
+            W: l => d.getUTCDay() + 1,
+            w: l => d.getUTCDay(),
+            v: l => ud.toLocaleString(locale, {timeZone, weekday: toRepValue(l)}),
+            j: l => d.week(),
+        
+            H: l => d.getUTCHours(),
+            h: l => (d.getUTCHours() % 12) || 12,
+            K: l => d.getUTCHours() || 24,
+            k: l => d.getUTCHours() % 12,
+            i: l => d.getUTCMinutes(),
+            s: l => d.getUTCSeconds(),
+            S: l => d.getUTCMilliseconds(),
+            A: l => d.getUTCHours() < 12 ? 'AM' : 'PM',
+            a: l => d.getUTCHours() < 12 ? 'am' : 'pm',
+            
+            Z: l => Math.trunc(utcOffset / 60),
+            T: l => Math.abs(utcOffset) % 60,
+        
+            z: l => d.offsetName(l === 1 ? 'short' : 'long'),
+        
+            Q: l => Math.floor(d.getUTCMonth()/4)+1,
+        
+            u: l => Math.round(uD.getTime()/1000)
+        }
+
         const opts: BaseFormatterProperties = {...this, ...options}
         return format.replace(reDateTimeToken, m =>
         {
