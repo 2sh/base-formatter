@@ -158,3 +158,55 @@ test('rounding modes', (t) =>
     })
     t.end()
 })
+
+import dayjs from 'dayjs'
+import dayOfYear from 'dayjs/plugin/dayOfYear'
+dayjs.extend(dayOfYear)
+import weekOfYear from 'dayjs/plugin/weekOfYear'
+dayjs.extend(weekOfYear)
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(timezone)
+import 'dayjs/locale/en'
+import 'dayjs/locale/de'
+
+const testDate = dayjs(new Date(2023, 8, 14, 22, 4, 14, 542)).locale('en-US')
+const testDate2 = dayjs(new Date(2022, 2, 25, 0, 5, 13, 163)).locale('de-DE')
+const testDate3 = dayjs(new Date(2000, 4, 12, 6, 7, 8, 912)).tz('America/New_York')
+const testDate4 = testDate3.tz('Europe/London')
+test('datetime', (t) =>
+{
+    t.equal(decimal.encodeDateTime(testDate, 'YYYYY-MMM-DDDD'), '02023-009-0014')
+    t.equal(dozenal.encodeDateTime(testDate, 'YYYYY-MMM-DDDD'), '01207-009-0012')
+    t.equal(dozenal.encodeDateTime(testDate, 'm'), 'Sep')
+    t.equal(dozenal.encodeDateTime(testDate, 'mm'), 'September')
+    t.equal(dozenal.encodeDateTime(testDate, 'D'), '12')
+    t.equal(dozenal.encodeDateTime(testDate, 'DDDDD'), '00012')
+    t.equal(dozenal.encodeDateTime(testDate2, 'ddd'), '070')
+    t.equal(dozenal.encodeDateTime(testDate2, 'W'), '6')
+    t.equal(dozenal.encodeDateTime(testDate2, 'w'), '5')
+    t.equal(dozenal.encodeDateTime(testDate2, 'v'), 'Fr')
+    t.equal(dozenal.encodeDateTime(testDate2, 'vv'), 'Fr.')
+    t.equal(dozenal.encodeDateTime(testDate2, 'vvv'), 'Freitag')
+    t.equal(dozenal.encodeDateTime(testDate2, 'j'), '10')
+    t.equal(dozenal.encodeDateTime(testDate2, 'H'), '0')
+    t.equal(dozenal.encodeDateTime(testDate2, 'h'), '10')
+    t.equal(dozenal.encodeDateTime(testDate2, 'K'), '20')
+    t.equal(dozenal.encodeDateTime(testDate2, 'k'), '0')
+    t.equal(dozenal.encodeDateTime(testDate2, 'i'), '5')
+    t.equal(dozenal.encodeDateTime(testDate2, 'ss'), '11')
+    t.equal(dozenal.encodeDateTime(testDate2, 'SSSS'), '1↋58')
+    t.equal(dozenal.encodeDateTime(testDate, 'A'), 'PM')
+    t.equal(dozenal.encodeDateTime(testDate2, 'A'), 'AM')
+    t.equal(dozenal.encodeDateTime(testDate, 'a'), 'pm')
+    t.equal(dozenal.encodeDateTime(testDate2, 'a'), 'am')
+    t.equal(dozenal.encodeDateTime(testDate3, 'Y-M-D H:i:s ZZTT'), '11↊8-5-10 1:7:8 -0400')
+    t.equal(dozenal.encodeDateTime(testDate4, 'Y-M-D H:i:s ZZ:TT'), '11↊8-5-10 6:7:8 +01:00')
+    t.equal(dozenal.encodeDateTime(testDate4, 'Q'), '2')
+    t.equal(dozenal.encodeDateTime(testDate4, 'u'), '228↊507↋8')
+    t.equal(dozenal.encodeDateTime(testDate3, 'z'), 'EDT')
+    t.equal(dozenal.encodeDateTime(testDate4, 'zz'), 'British Summer Time')
+
+    t.end()
+})

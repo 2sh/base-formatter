@@ -66,5 +66,8 @@
     "ts-node": "^10.9.1",
     "typedoc": "^0.24.7",
     "typescript": "^5.0.4"
+  },
+  "peerDependencies": {
+    "dayjs": "^1.11.8"
   }
 }

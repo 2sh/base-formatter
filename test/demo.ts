@@ -1,6 +1,9 @@
 import type { RoundingMode } from '../src/base-formatter'
 
 import Decimal from 'decimal.js'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
 
 import Base from '../src/base-formatter'
 
@@ -85,20 +88,6 @@ fractions.forEach(([num, dem]) =>
 console.log()
 
 console.log("Date & Time")
-const dateString = (date: Date, iso: boolean) =>
-{   const u = iso ? 'UTC' : ''
-    const p = [
-        date[`get${u}FullYear`](),
-        date[`get${u}Month`]() + 1,
-        date[`get${u}Date`](),
-        date[`get${u}Hours`](),
-        date[`get${u}Minutes`](),
-        date[`get${u}Seconds`](),
-    ].map(i => base.encode(i, {minimumIntegerLength: 2}))
-    return `${p[0]}-${p[1]}-${p[2]} ${p[3]}:${p[4]}:${p[5]}`
-}
-
-const d = new Date()
-console.log('Local: ' + dateString(d, false))
-console.log('UTC:   ' + dateString(d, true))
-console.log()
+console.log('Local:', base.encodeDateTime(dayjs(), 'YYYY-MM-DD HH:ii:ss tt:zz'))
+console.log('UTC:  ', base.encodeDateTime(dayjs.utc(), 'YYYY-MM-DD HH:ii:ss tt:zz'))
+console.log('XMAS: ', base.encodeDateTime(dayjs('2023-12-25'), 'YYYY-MM-DD HH:ii'))

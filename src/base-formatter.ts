@@ -16,7 +16,13 @@
  * @packageDocumentation
  */
 
-import Decimal from 'decimal.js'
+import type dayjs from 'dayjs'
+import type {} from 'dayjs/plugin/dayOfYear'
+import type {} from 'dayjs/plugin/weekOfYear'
+import type {} from 'dayjs/plugin/utc'
+import type {} from 'dayjs/plugin/timezone'
+
+import { Decimal } from 'decimal.js'
 
 // Basing options on:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
@@ -105,26 +111,13 @@ export type UseGrouping =
  */
 export interface BaseConverterOptions
 {
-    /**
-     * How numbers are to be rounded.
-     * @defaultValue `'halfExpand'`
-     */
+    /** {@inheritDoc BaseConverter.roundingMode} */
     roundingMode?: RoundingMode
-    /**
-     * The precision of the number, the number of significant digits.
-     * @defaultValue `32`
-     */
+    /** {@inheritDoc BaseConverter.precision} */
     precision?: number
-    /**
-     * The maximum fraction length.
-     * By default, the maximum fraction length is determined by the precision.
-     * @defaultValue `null`
-     */
+    /** {@inheritDoc BaseConverter.maximumFractionLength} */
     maximumFractionLength?: number | null
-    /**
-     * The formatting that should be displayed for the number.
-     * @defaultValue `'standard'`
-     */
+    /** {@inheritDoc BaseConverter.notation} */
     notation?: Notation
 }
 type BaseConverterProperties = Required<BaseConverterOptions>
@@ -135,83 +128,34 @@ type BaseConverterProperties = Required<BaseConverterOptions>
  */
 export interface BaseFormatterOnlyOptions
 {
-    /**
-     * The radix character, or "decimal" point/mark/separator, such as the point in `0.5`).
-     * @defaultValue `'.'`
-     */
+    /** {@inheritDoc BaseFormatter.radixCharacter} */
     radixCharacter?: string
-    /**
-     * The negative sign.
-     * @defaultValue `'-'`
-     */
+    /** {@inheritDoc BaseFormatter.negativeSign} */
     negativeSign?: string
-    /**
-     * The positive sign.
-     * @defaultValue `'+'`
-     */
+    /** {@inheritDoc BaseFormatter.positiveSign} */
     positiveSign?: string
-    /**
-     * The grouping separator, such as the commas in `100,000,000`.
-     * @defaultValue `','`
-     */
+    /** {@inheritDoc BaseFormatter.groupingSeparator} */
     groupingSeparator?: string
-    /**
-     * The grouping length, the distance between grouping separators, e.g. with a length of 2: `1,00,00,00`.
-     * @defaultValue `3`
-     */
+    /** {@inheritDoc BaseFormatter.groupingLength} */
     groupingLength?: number
-    /**
-     * The digit separator, if specified, will be places between every digit without a grouping separator.
-     * @defaultValue `''`
-     */
+    /** {@inheritDoc BaseFormatter.digitSeparator} */
     digitSeparator?: string
-    /**
-     * The scientific notation character, such as the `e` in `1.342e3`.
-     * @defaultValue `'e'`
-     */
+    /** {@inheritDoc BaseFormatter.scientificNotationCharacter} */
     scientificNotationCharacter?: string
-    /**
-     * The integer pad character, padding the left side of the integer.
-     * By default the specified digit for zero is used,
-     * but could also be a `' '` space char for example.
-     * @defaultValue `null`
-     */
-    integerPadCharacter?: string | null // the digit zero char if not string
-    /**
-     * The fraction pad character, padding the right side of the fraction.
-     * By default the specified digit for zero is used, but could also be a `' '` space char for example.
-     * @defaultValue `null`
-     */
+    /** {@inheritDoc BaseFormatter.integerPadCharacter} */
+    integerPadCharacter?: string | null
+    /** {@inheritDoc BaseFormatter.fractionPadCharacter} */
     fractionPadCharacter?: string | null
 
-    /**
-     * The minimum fraction.
-     * A value with a smaller fraction length than this number will be
-     * right-padded with zeros.
-     * @defaultValue `0`
-     */
+    /** {@inheritDoc BaseFormatter.minimumFractionLength} */
     minimumFractionLength?: number
-    /**
-     * The minimum integer length.
-     * A value with a smaller number of integer digits than this number will be
-     * left-padded with zeros or the specified integer pad character.
-     * @defaultValue `0`
-     */
+    /** {@inheritDoc BaseFormatter.minimumIntegerLength} */
     minimumIntegerLength?: number
-    /**
-     * When to display the radix character.
-     * @defaultValue `'auto'`
-     */
+    /** {@inheritDoc BaseFormatter.radixDisplay} */
     radixDisplay?: RadixDisplay
-    /**
-     * When to display the sign.
-     * @defaultValue `'auto'`
-     */
+    /** {@inheritDoc BaseFormatter.signDisplay} */
     signDisplay?: SignDisplay
-    /**
-     * When numbers are to be grouped.
-     * @defaultValue `false`
-     */
+    /** {@inheritDoc BaseFormatter.useGrouping} */
     useGrouping?: UseGrouping
 }
 type BaseFormatterProperties = Required<BaseFormatterOnlyOptions>
@@ -298,6 +242,40 @@ function convertFractionToBase(value: Decimal, base: number, maximumLength: Deci
 
 const zero = new Decimal(0)
 
+const dateTimeTokenFunctions: {[token: string]: (dateTime: dayjs.Dayjs, length: number) => number | string } =
+{
+    Y: d => d.year(),
+    y: d => d.year(),
+    M: d => d.month()+1,
+    m: (d, l) => d.format('M'.repeat(Math.min(l+2, 4))),
+    D: d => d.date(),
+    d: d => d.dayOfYear(),
+    W: d => d.day() + 1,
+    w: d => d.day(),
+    v: (d, l) => d.format('d'.repeat(Math.min(l+1, 4))),
+    j: d => d.week(),
+
+    H: d => d.hour(),
+    h: d => (d.hour() % 12) || 12,
+    K: d => d.hour() || 24,
+    k: d => d.hour() % 12,
+    i: d => d.minute(),
+    s: d => d.second(),
+    S: d => d.millisecond(),
+    A: d => d.hour() < 12 ? 'AM' : 'PM',
+    a: d => d.hour() < 12 ? 'am' : 'pm',
+    
+    Z: d => Math.trunc(d.utcOffset() / 60),
+    T: d => Math.abs(d.utcOffset()) % 60,
+
+    z: (d, l) => d.offsetName(l === 1 ? 'short' : 'long'),
+
+    Q: d => Math.floor(d.month()/4)+1,
+
+    u: d => d.unix()
+}
+const reDateTimeToken = new RegExp('\\[.+?\\]|' + Object.keys(dateTimeTokenFunctions).map(l => l + '+').join('|'), 'g')
+
 
 /**
  * The class from which to create a `BaseConverter` instance for encoding to the {@link NumeralOutput | `NumeralOutput`}.
@@ -308,10 +286,25 @@ export class BaseConverter
      * The base number
      */
     public readonly base: number
+    
     /**
-     * The properties of the class, set by the options of the constructor
+     * How numbers are to be rounded.
      */
-    public readonly properties: BaseConverterProperties
+    public readonly roundingMode: RoundingMode = 'halfExpand'
+    /**
+     * The precision of the number, the number of significant digits.
+     */
+    public readonly precision: number = 32
+    /**
+     * The maximum fraction length.
+     * By default, the maximum fraction length is determined by the precision.
+     */
+    public readonly maximumFractionLength: number | null = null
+    /**
+     * The formatting that should be displayed for the number.
+     */
+    public readonly notation: Notation = 'standard'
+
     /**
      * The rounding modes used by the {@link encode | `encode`} method.
      */
@@ -335,14 +328,7 @@ export class BaseConverter
     constructor(base: number, options: BaseConverterOptions = {})
     {
         this.base = base
-        this.properties = {
-            roundingMode: 'halfExpand',
-            precision: 32,
-            maximumFractionLength: null,
-            notation: 'standard',
-
-            ...options,
-        }
+        Object.assign(this, options)
 
         this.lnBase = new Decimal(this.base).ln()
         this.lnBase3 = new Decimal(Math.pow(this.base, 3)).ln()
@@ -408,7 +394,7 @@ export class BaseConverter
      */
     public encode(numberValue: number | string | Decimal, options?: BaseConverterOptions): NumeralOutput
     {
-        const props: BaseConverterProperties = {...this.properties, ...options}
+        const props: BaseConverterProperties = {...this, ...options}
         
         const decVal = new Decimal(numberValue)
         let isNegative = decVal.isNegative()
@@ -533,10 +519,72 @@ export class BaseFormatter
      * The digits to use.
      */
     public readonly digits: string[]
+
     /**
-     * The properties of the class, set by the options of the constructor
+     * The radix character, or "decimal" point/mark/separator, such as the point in `0.5`).
      */
-    public readonly properties: BaseFormatterProperties
+    public readonly radixCharacter: string = '.'
+    /**
+     * The negative sign.
+     */
+    public readonly negativeSign: string = '-'
+    /**
+     * The positive sign.
+     */
+    public readonly positiveSign: string = '+'
+    /**
+     * The grouping separator, such as the commas in `100,000,000`.
+     */
+    public readonly groupingSeparator: string = ','
+    /**
+     * The grouping length, the distance between grouping separators, e.g. with a length of 2: `1,00,00,00`.
+     */
+    public readonly groupingLength: number = 3
+    /**
+     * The digit separator, if specified, will be places between every digit without a grouping separator.
+     */
+    public readonly digitSeparator: string = ''
+    /**
+     * The scientific notation character, such as the `e` in `1.342e3`.
+     */
+    public readonly scientificNotationCharacter: string = 'e'
+    /**
+     * The integer pad character, padding the left side of the integer.
+     * By default the specified digit for zero is used,
+     * but could also be a `' '` space char for example.
+     */
+    public readonly integerPadCharacter: string | null = null
+    /**
+     * The fraction pad character, padding the right side of the fraction.
+     * By default the specified digit for zero is used, but could also be a `' '` space char for example.
+     */
+    public readonly fractionPadCharacter: string | null = null
+
+    /**
+     * The minimum fraction.
+     * A value with a smaller fraction length than this number will be
+     * right-padded with zeros.
+     */
+    public readonly minimumFractionLength: number = 0
+    /**
+     * The minimum integer length.
+     * A value with a smaller number of integer digits than this number will be
+     * left-padded with zeros or the specified integer pad character.
+     */
+    public readonly minimumIntegerLength: number = 0
+    /**
+     * When to display the radix character.
+     */
+    public readonly radixDisplay: RadixDisplay = 'auto'
+    /**
+     * When to display the sign.
+     */
+    public readonly signDisplay: SignDisplay = 'auto'
+    /**
+     * When numbers are to be grouped.
+     */
+    public readonly useGrouping: UseGrouping = false
+    
     /**
      * The RegExp object used by the {@link isNumber | `isNumber`} method.
      */
@@ -556,25 +604,7 @@ export class BaseFormatter
         const digitArray = typeof digits === 'string' ? [...digits] : digits
         const base = digitArray.length
         this.baseConverter = new BaseConverter(base, options)
-        
-        this.properties = {
-            radixCharacter: '.',
-            negativeSign: '-',
-            positiveSign: '+',
-            groupingSeparator: ',',
-            groupingLength: 3,
-            digitSeparator: '',
-            scientificNotationCharacter: 'e',
-            integerPadCharacter: null,
-            fractionPadCharacter: null,
-            minimumFractionLength: 0,
-            minimumIntegerLength: 0,
-            radixDisplay: 'auto',
-            signDisplay: 'auto',
-            useGrouping: false,
-
-            ...options
-        }
+        Object.assign(this, options)
         
         this.digits = digitArray
         this.base = base
@@ -586,23 +616,23 @@ export class BaseFormatter
             : ''
         const uDigits = this.digits.map(d => u(d)).join('')
         const signPattern = '['
-            + u(this.properties.negativeSign)
-            + u(this.properties.positiveSign)
+            + u(this.negativeSign)
+            + u(this.positiveSign)
         + ']?'
         
         const pattern = '^'
         + signPattern
         + '['
             + uDigits
-            + u(this.properties.digitSeparator)
-            + u(this.properties.groupingSeparator)
+            + u(this.digitSeparator)
+            + u(this.groupingSeparator)
         + ']+'
         + '(?:'
-            + u(this.properties.radixCharacter)
+            + u(this.radixCharacter)
             + '[' + uDigits + ']*'
         + ')?'
         + '(?:'
-            + u(this.properties.scientificNotationCharacter)
+            + u(this.scientificNotationCharacter)
             + signPattern
             + '[' + uDigits + ']+'
         + ')?'
@@ -856,18 +886,16 @@ export class BaseFormatter
      * Encodes the specified number according to the instance base and specified digits and properties.
      * @param numberValue - The number to encode, as a number, string or Decimal type.
      * @param options - The options to use for formatting.
-     * @returns the encoded number as a string.
+     * @returns The encoded number as a string.
      * @group Instance Methods
      */
     public encode(numberValue: number | string | Decimal, options?: BaseFormatterOptions): string
     {
         const converterProps: BaseConverterProperties = {
-            ...this.baseConverter.properties,
+            ...this.baseConverter,
             ...options
         }
-        const props: BaseFormatterProperties = {
-            ...this.properties,
-            ...options}
+        const props: BaseFormatterProperties = {...this, ...options}
         
         if (typeof props.integerPadCharacter !== "string")
             props.integerPadCharacter = this.baseZero
@@ -911,7 +939,6 @@ export class BaseFormatter
             + encodedExponent
     }
 
-
     /**
      * Decode an en encoded number according to the instance base and specified digits and properties.
      * @param encodedValue - An encoded number as a string in the instance base.
@@ -922,7 +949,7 @@ export class BaseFormatter
      */
     public decode(encodedValue: string, options?: BaseFormatterOptions): number
     {
-        const opts: BaseFormatterProperties = {...this.properties, ...options}
+        const opts: BaseFormatterProperties = {...this, ...options}
 
         const trimmedValue = encodedValue.trim()
 
@@ -951,9 +978,89 @@ export class BaseFormatter
             integer: integerArray.map((d) => this.decodeDigit(d)),
             fraction: fractionArray.map((d) => this.decodeDigit(d)),
             exponent: exponent
-        }) 
-        
-        
+        })
+    }
+
+    /**
+     * Encode a date-time object into a formatted string, converting the numbers to the specified base.
+     * @param dateTime - A Day.js object.
+     * @param format - The output date-time format.
+     * 
+     * The format is made up of a series of tokens.
+     * For numbers, multiples of the token indicate the minimum padded length unless specified otherwise.
+     * Month names, names of the days of the week, day period and era are output according to the locale
+     * specified within the Day.js object.
+     * 
+     * 
+     * The tokens:
+     * - `Y`: The year.
+     * - `y`: The year, multiples of which indicate the maximum length,
+     *        e.g. The year `2023` formatted with `yy` returns `'23'`.
+     * - `M`: The month, e.g. A date in September formatted with `MM` returns `'09'`.
+     * - `m`: The abbreviated month name, e.g. `'Sep'` for September.
+     * - `mm`: The full month name.
+     * - `D`: The day of the month.
+     * - `d`: The day of the year. Dependent on the `dayOfYear` Day.js plugin.
+     * - `W`: The day of the week, starting from 1.
+     * - `w`: The day of the week, starting from 0.
+     * - `v`: The min name of the day of the week, e.g. `'We'` for Wednesday.
+     * - `vv`: The short name of the day of the week, e.g. `'Wed'` for Wednesday.
+     * - `vvv`: The full name of the day of the week.
+     * - `j`: The week number of the year. Dependent on the `weekOfYear` Day.js plugin.
+     * - `H`: The hour, 0 to 23.
+     * - `h`: The hour, 1 to 12.
+     * - `K`: The hour, 1 to 24.
+     * - `k`: The hour, 0 to 11.
+     * - `i`: The minutes.
+     * - `s`: The seconds.
+     * - `S`: The "milliseconds", the equivelent thousandth of a second.
+     * - `A`: `'AM'` or `'PM'`.
+     * - `a`: `'am'` or `'pm'`.
+     * - `Z`: The UTC offset hour with sign. Combined with `T` as
+     *        e.g. `'ZZ:TT'` to return `'+07:00'` for a UTC offset of 420 minutes.
+     *        Dependent on the `timezone` Day.js plugin.
+     * - `T`: The minutes of the UTC offset hour, used in combination with `Z`.
+     *        Dependent on the `timezone` Day.js plugin.
+     * - `Q`: The year quarter, `1` to `4`.
+     * - `u`: Unix Timestamp.
+     * - `z`: Abbreviated named offset. Dependent on the `timezone` Day.js plugins.
+     * - `zz`: Unabbreviated named offset. Dependent on the `timezone` Day.js plugins.
+     * 
+     * 
+     * Various formats:
+     * - ISO 8601: `'YYYY-MM-DD[T]HH:ii:ssttzz'`
+     * - RFC 2822: `'vvv, DD mmm YYYY HH:ii:ss ttzz'`
+     * - Short: `D/M/yy`
+     * - US: `MM-DD-YYYY`
+     * @param options - The options to use for formatting.
+     * @returns The encoded and formatted date-time.
+     * @example
+     * dozenal.encodedDateTime(dayjs('2023-12-25'), 'YYYY-MM-DD') // Returns: '1207-10-21'
+     * @group Instance Methods
+     */
+    public encodeDateTime(dateTime: dayjs.Dayjs, format: string, options?: BaseFormatterOptions)
+    {
+        const opts: BaseFormatterProperties = {...this, ...options}
+        return format.replace(reDateTimeToken, m =>
+        {
+            const token = m.charAt(0)
+            if (token === '[') return m
+            let output = dateTimeTokenFunctions[token](dateTime, m.length)
+            if (typeof output === 'string') return output
+            const isMilli = token === 'S'
+            if (isMilli) output /= 1000
+            let encodedOutput = this.encode(output, {
+                ...options,
+                minimumIntegerLength: m.length,
+                minimumFractionLength: (isMilli ? 4 : 0),
+                maximumFractionLength: (isMilli ? 4 : null),
+                signDisplay: token === 'Z' ? 'always' : 'auto'
+            })
+            if (isMilli) encodedOutput = encodedOutput.split(opts.radixCharacter)[1]
+            return token === 'y'
+                ? encodedOutput.substring((encodedOutput.length-m.length)-1)
+                : encodedOutput
+        })
     }
     
     /**
