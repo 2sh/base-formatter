@@ -17,11 +17,11 @@ A Javascript library for encoding numbers to any base with various formatting op
   - [`BaseConverter`](https://2sh.github.io/base-formatter/classes/BaseConverter.html) - Alternatively represents numbers as numberal objects.
 
 ## Installation
+Installing the [NPM package](https://www.npmjs.com/package/base-formatter):
 - Yarn
   ```
   yarn add base-formatter
   ```
-
 - NPM
   ```
   npm install base-formatter
