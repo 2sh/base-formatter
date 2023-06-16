@@ -237,26 +237,30 @@ function convertFractionToBase(value: Decimal, base: number, maximumLength: Deci
 const zero = new Decimal(0)
 
 const dateTimeTokens = [
-    "Y", "y",
-    "M", "m",
-    "D", "d",
-    "W", "w",
-    "v",
-    "j",
-    "H", "h", "K", "k",
-    "i",
-    "s",
-    "S",
-    "A", "a",
-    "Z", "T",
-    "z",
-    "Q",
-    "u"
+    'Y', 'y',
+    'M',
+    'N', 'n',
+    'D', 'd',
+    'W', 'w',
+    'V', 'v',
+    'j',
+    'H', 'h', 'K', 'k',
+    'i',
+    's',
+    'S',
+    'A', 'a',
+    'e',
+    'p',
+    'Z', 'T',
+    'z',
+    'g',
+    'Q',
+    'u'
 
 ] as const
 type DateTimeToken = typeof dateTimeTokens[number]
 
-const reDateTimeToken = new RegExp('\\[.+?\\]|' + dateTimeTokens.map(l => l + '+').join('|'), 'g')
+const reDateTimeToken = new RegExp('\\[(.+?)\\]|(' + dateTimeTokens.map(l => l + '+').join('|') + ')(o)?', 'g')
 
 const getTimezoneOffset = (date: Date, timeZone: string) =>
 {
@@ -267,7 +271,8 @@ const getTimezoneOffset = (date: Date, timeZone: string) =>
 
 const toRepValue = (length: number) => (['narrow', 'short', 'long'] as const)[Math.min(2, length-1)]
 
-
+const getDaysInYear = (d: Date) =>
+    Math.ceil((d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5)
 
 /**
  * The class from which to create a `BaseConverter` instance for encoding to the {@link NumeralOutput | `NumeralOutput`}.
@@ -1030,14 +1035,14 @@ export class BaseFormatter
      * dozenal.encodedDateTime(dayjs('2023-12-25'), 'YYYY-MM-DD') // Returns: '1207-10-21'
      * @group Instance Methods
      */
-    public encodeDateTime(dateTime: number | Date, format: string, options?: BaseFormatterOptions)
+    public encodeDateTime(dateTime: number | Date, format: string, inputTimeZone?: string, inputLocale?: string, options?: BaseFormatterOptions)
     {
-        const inputTimeZone = undefined
-        const inputLocale = undefined
-
         const formatting = Intl.DateTimeFormat(inputLocale, { timeZone: inputTimeZone })
         const { timeZone, locale } = formatting.resolvedOptions()
-        
+        const intlLocale = new Intl.Locale(locale)
+        // @ts-ignore
+        let { firstDay, minimalDays } = intlLocale.weekInfo
+
         const ud = typeof dateTime === 'number'
             ? new Date(dateTime) : dateTime
 
@@ -1047,18 +1052,33 @@ export class BaseFormatter
         
         const d = new Date(ud.getTime() + utcOffset*6e4)
 
+        const getIntlData = (key: string, value: string) =>
+            Intl.DateTimeFormat(locale, {timeZone, [key]: value}).formatToParts(ud)
+                .find(({type}) => type === key).value
+        
+        const getDay = () =>
+        {
+            const adj = d.getUTCDay() - firstDay % 7
+            return adj >= 0 ? adj : 7 + adj
+        }
+
+        const getWeek = () => Math.ceil(getDaysInYear(
+                new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getDate()-getDay()+(7-minimalDays)))/7)
+
         const dateTimeTokenFunctions: {[token in DateTimeToken]: (length: number) => number | string } =
         {
             Y: l => d.getUTCFullYear(),
             y: l => d.getUTCFullYear(),
             M: l => d.getUTCMonth()+1,
-            m: l => ud.toLocaleString(locale, {timeZone, month: toRepValue(l)}),
+            N: l => ud.toLocaleString(locale, {timeZone, month: 'long'}).substring(0, l),
+            n: l => ud.toLocaleString(locale, {timeZone, month: toRepValue(l)}),
             D: l => d.getUTCDate(),
-            d: l => d.dayOfYear(),
-            W: l => d.getUTCDay() + 1,
-            w: l => d.getUTCDay(),
+            d: l => getDaysInYear(d),
+            W: l => getDay() + 1,
+            w: l => getDay(),
+            V: l => ud.toLocaleString(locale, {timeZone, weekday: 'long'}).substring(0, l),
             v: l => ud.toLocaleString(locale, {timeZone, weekday: toRepValue(l)}),
-            j: l => d.week(),
+            j: l => getWeek(),
         
             H: l => d.getUTCHours(),
             h: l => (d.getUTCHours() % 12) || 12,
@@ -1067,38 +1087,42 @@ export class BaseFormatter
             i: l => d.getUTCMinutes(),
             s: l => d.getUTCSeconds(),
             S: l => d.getUTCMilliseconds(),
-            A: l => d.getUTCHours() < 12 ? 'AM' : 'PM',
-            a: l => d.getUTCHours() < 12 ? 'am' : 'pm',
+            A: l => d.getUTCHours() < 12 ? ['A', 'AM', 'A.M.'][Math.min(l-1, 2)] : ['P', 'PM', 'P.M.'][Math.min(l-1, 2)],
+            a: l => d.getUTCHours() < 12 ? ['a', 'am', 'a.m.'][Math.min(l-1, 2)] : ['p', 'pm', 'p.m.'][Math.min(l-1, 2)],
+            p: l => ud.toLocaleString(locale, {timeZone, dayPeriod: toRepValue(l)}),
+            e: l => getIntlData('era', toRepValue(l)),
             
             Z: l => Math.trunc(utcOffset / 60),
             T: l => Math.abs(utcOffset) % 60,
         
-            z: l => d.offsetName(l === 1 ? 'short' : 'long'),
+            z: l => getIntlData('timeZoneName', l > 1 ? 'long' : 'short'),
+            g: l => getIntlData('timeZoneName', l > 1 ? 'longGeneric' : 'shortGeneric'),
         
             Q: l => Math.floor(d.getUTCMonth()/4)+1,
         
-            u: l => Math.round(uD.getTime()/1000)
+            u: l => Math.floor(ud.getTime()/1000)
         }
 
         const opts: BaseFormatterProperties = {...this, ...options}
-        return format.replace(reDateTimeToken, m =>
+        return format.replace(reDateTimeToken, (_, escaped, tokens, mod) =>
         {
-            const token = m.charAt(0)
-            if (token === '[') return m
-            let output = dateTimeTokenFunctions[token](dateTime, m.length)
+            const token = tokens.charAt(0)
+            const length = tokens.length
+            if (escaped) return escaped
+            let output = dateTimeTokenFunctions[token](length)
             if (typeof output === 'string') return output
             const isMilli = token === 'S'
             if (isMilli) output /= 1000
             let encodedOutput = this.encode(output, {
                 ...options,
-                minimumIntegerLength: m.length,
+                minimumIntegerLength: length,
                 minimumFractionLength: (isMilli ? 4 : 0),
                 maximumFractionLength: (isMilli ? 4 : null),
                 signDisplay: token === 'Z' ? 'always' : 'auto'
             })
             if (isMilli) encodedOutput = encodedOutput.split(opts.radixCharacter)[1]
             return token === 'y'
-                ? encodedOutput.substring((encodedOutput.length-m.length)-1)
+                ? encodedOutput.substring((encodedOutput.length-length)-1)
                 : encodedOutput
         })
     }

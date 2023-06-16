@@ -49,7 +49,6 @@
     "build:types": "tsc --project tsconfig.types.json",
     "prepublishOnly": "yarn test && yarn run build",
     "test": "ts-node test/tests.ts",
-    "lint": "eslint -c config/eslintrc.json src test",
     "docs": "typedoc",
     "demo": "ts-node test/demo.ts"
   },
@@ -59,9 +58,6 @@
   "devDependencies": {
     "@types/node": "^20.2.5",
     "@types/tape": "^5.6.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.8",
-    "@typescript-eslint/parser": "^5.59.8",
-    "eslint": "^8.42.0",
     "tape": "^5.6.3",
     "ts-node": "^10.9.1",
     "typedoc": "^0.24.7",

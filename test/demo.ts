@@ -1,16 +1,13 @@
 import type { RoundingMode } from '../src/base-formatter'
 
 import Decimal from 'decimal.js'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-dayjs.extend(utc)
 
 import Base from '../src/base-formatter'
 
-//const base = Base.decimal()
+const base = Base.decimal()
 //const base = Base.hexadecimal()
 //const base = Base.base62()
-const base = Base.dozenal()
+//const base = Base.dozenal()
 //const base = Base.duodecimal()
 //const base = Base.cuneiform()
 //const base = Base.domino()
@@ -88,6 +85,12 @@ fractions.forEach(([num, dem]) =>
 console.log()
 
 console.log("Date & Time")
-console.log('Local:', base.encodeDateTime(dayjs(), 'YYYY-MM-DD HH:ii:ss tt:zz'))
-console.log('UTC:  ', base.encodeDateTime(dayjs.utc(), 'YYYY-MM-DD HH:ii:ss tt:zz'))
-console.log('XMAS: ', base.encodeDateTime(dayjs('2023-12-25'), 'YYYY-MM-DD HH:ii'))
+console.log('Local:', base.encodeDateTime(Date.now(), 'YYYY-MM-DD HH:ii:ss ZZ:TT'))
+console.log('UTC:  ', base.encodeDateTime(Date.now(), 'YYYY-MM-DD HH:ii:ss ZZ:TT', 'UTC'))
+console.log('XMAS: ', base.encodeDateTime(new Date('2023-12-25'), 'YYYY-MM-DD'))
+console.log()
+
+for(let i=-20; i<20; i++)
+{
+	console.log(base.encodeDateTime(new Date(2014, 0, i), 'YYYY-MM-DD ddd VVV jj'))
+}
