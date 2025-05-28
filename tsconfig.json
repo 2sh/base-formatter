@@ -2,7 +2,9 @@
     "compilerOptions":
     {
         "target": "ES2021",
+        "module": "NodeNext",
         "moduleResolution": "nodenext",
+        "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
         "listEmittedFiles": true
