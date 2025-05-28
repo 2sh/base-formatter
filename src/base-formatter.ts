@@ -139,7 +139,7 @@ export interface BaseConverterOptions
    */
   notation?: Notation
 }
-type BaseConverterProperties = Required<BaseConverterOptions>
+export type BaseConverterProperties = Required<BaseConverterOptions>
 
 /**
  * The options specifically to the {@link BaseFormatter | `BaseFormatter`}
@@ -232,7 +232,7 @@ export interface BaseFormatterOnlyOptions
    */
   useGrouping?: UseGrouping
 }
-type BaseFormatterProperties = Required<BaseFormatterOnlyOptions>
+export type BaseFormatterProperties = Required<BaseFormatterOnlyOptions>
 
 /**
  * The options passed to {@link BaseFormatter | `BaseFormatter`},
@@ -546,8 +546,6 @@ export class BaseConverter
    * Decode an encoded number.
    * @param encodedValue - An encoded number as a {@link NumeralOutput | `NumeralOutput`}
    * object in the instance base.
-   * @param options - The options to use if, for example, alternative
-   * characters were specified during encoding.
    * @returns The decoded number.
    * @group Instance Methods
    */
