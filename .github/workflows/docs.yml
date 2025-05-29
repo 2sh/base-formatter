@@ -24,16 +24,15 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-strategy:
-  matrix:
-    node-version: ['18.x', '20.x']
-
 jobs:
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['18.x', '20.x']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
