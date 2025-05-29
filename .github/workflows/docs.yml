@@ -24,6 +24,10 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+strategy:
+  matrix:
+    node-version: ['18.x', '20.x']
+
 jobs:
   deploy:
     environment:
@@ -33,14 +37,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
       - name: Run docs
         run: npm run docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'docs/'
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
